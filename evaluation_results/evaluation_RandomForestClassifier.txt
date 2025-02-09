@@ -1,0 +1,20 @@
+Precision: 0.632295719844358
+Recall: 0.5887681159420289
+F1-score: 0.6097560975609756
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.69      0.72      0.70       683
+           1       0.63      0.59      0.61       552
+
+    accuracy                           0.66      1235
+   macro avg       0.66      0.66      0.66      1235
+weighted avg       0.66      0.66      0.66      1235
+Confusion Matrix:
+[[494 189]
+ [227 325]]
+
+AUC: 0.6980897362446157
+Cross-Validation Scores: [0.66700405 0.65991903 0.66970618 0.68591692 0.65957447]
+Average Cross-Validation Score: 0.668424129062427
