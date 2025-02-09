@@ -7,14 +7,20 @@ root = Path(__file__).parent
 cwd = Path(__file__).parent
 path_Data_processing = cwd / 'Data Processing'
 path_Random_forest = cwd / 'Classification Models' / 'Uninterpretable Models'
+
+path_Decision_tree = cwd / 'Classification Models'
+
 print(path_Data_processing)
 
 sys.path
 sys.path.append(str(path_Data_processing))
 sys.path.append(str(path_Random_forest))
 
+sys.path.append(str(path_Decision_tree))
+
 import DataProcessor
 import Randomforest
+# import DecisionTree # TODO WHY IMPORT NOT WORKING
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,3 +55,9 @@ rf.evaluate_random_forest()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
+# dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results_path="Eval")
+
+# dt.train_random_forest()
+# dt.evaluate_random_forest()
+
+#----------------------------------------------------------------------------------------------------------------------------------------
