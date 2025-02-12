@@ -23,13 +23,15 @@ import DecisionTree # TODO WHY IMPORT NOT WORKING
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-df = pd.read_csv('Dataset/cox-violent-parsed_filt_processed.csv')
+#df = pd.read_csv('Dataset/cox-violent-parsed_filt_processed.csv')
+df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
 df = df.dropna(subset=["score_text"])
 
 
 relevant = ["sex","age","race","juv_fel_count","juv_misd_count","juv_other_count",
             "c_charge_degree","r_charge_degree","r_days_from_arrest",
            "is_recid","vr_charge_degree","event"]
+
 
 #  "is_violent_recid",
 
@@ -43,8 +45,9 @@ class_names = ["0", "1", "2"]
 
 y = df[target]
 df.drop(target, axis=1, inplace=True)
-processor_simplified = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=False, encoder_enabled=True, imputer_enabled=True)
-(X_train, X_test, y_train, y_test) = processor_simplified.process_data()
+#processor_processed = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=False, encoder_enabled=True, imputer_enabled=True)
+processor_raw = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True)
+(X_train, X_test, y_train, y_test) = processor_raw.process_data()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
