@@ -10,17 +10,16 @@ path_Random_forest = cwd / 'Classification Models' / 'Uninterpretable Models'
 
 path_Decision_tree = cwd / 'Classification Models'
 
-print(path_Data_processing)
+print(path_Decision_tree)
 
 sys.path
 sys.path.append(str(path_Data_processing))
 sys.path.append(str(path_Random_forest))
-
 sys.path.append(str(path_Decision_tree))
 
 import DataProcessor
 import Randomforest
-# import DecisionTree # TODO WHY IMPORT NOT WORKING
+import DecisionTree # TODO WHY IMPORT NOT WORKING
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 

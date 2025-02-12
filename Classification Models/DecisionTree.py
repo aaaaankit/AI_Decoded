@@ -9,7 +9,7 @@ import shap
 # from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
-import graphviz
+#import graphviz
 from pathlib import Path
 import sys
 
@@ -22,7 +22,7 @@ sys.path
 import Classification_models
 
 # make class with Classification_models as parent class
-class DecisionTreeTrainer(Classification_models.Classification_models):
+class DecisionTreeTrainer(Classification_models.ClassificationModels):
     def __init__(self, X_train, y_train, X_test, y_test, model_name, model_path=None, evaluation_results_path=None):
         modelName = 'DecisionTreeClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results_path)
