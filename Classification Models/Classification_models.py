@@ -23,7 +23,7 @@ class ClassificationModels:
             y_test (pandas.Series): The labels of the testing dataset.
             model_name (str): The name of the model being used.
             model_path (str, optional): The path where the model is saved or loaded from (default is None).
-            evaluation_results_path (str, optional): The path to save evaluation results (default is None).
+            evaluation_results (str, optional): The path to save evaluation results (default is None).
 
         Methods:
             train_model(model): 
@@ -37,7 +37,7 @@ class ClassificationModels:
             plot_roc_curve_multiclass(model): 
                 Plots and saves the ROC curve for multi-class classification.
     """
-    def __init__(self, X_train, y_train, X_test, y_test, model_name, model_path=None, evaluation_results_path=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_name, model_path=None, evaluation_results=None):
         """
         Initializes the ClassificationModels class.
 
@@ -48,7 +48,7 @@ class ClassificationModels:
         - y_test: Labels for the test data.
         - model_name: Name of the model.
         - model_path: Optional path to save/load the model (default is None).
-        - evaluation_results_path: Optional path to save evaluation results (default is None).
+        - evaluation_results: Optional path to save evaluation results (default is None).
         """
         self.X_train = X_train  
         self.y_train = y_train  
@@ -56,7 +56,7 @@ class ClassificationModels:
         self.y_test = y_test    
         self.model_path = model_path  
         self.model_name = model_name  
-        self.evaluation_results_path = evaluation_results_path 
+        self.evaluation_results = evaluation_results 
 
     def train_model(self, model):
         """
@@ -114,19 +114,25 @@ class ClassificationModels:
 
         return model  
     
+
     def evaluate_model(self, model):
         """
         Evaluate the model using various evaluation metrics (precision, recall, F1 score, etc.).
-    
+
         Args:
         - model: The trained model to evaluate.
         """
-        y_pred = model.predict(self.X_test)
+        y_pred = model.predict(self.X_test) 
         
-        # Calculate precision, recall, and F1 score for binary classification
-        precision = precision_score(self.y_test, y_pred, zero_division=1)
-        recall = recall_score(self.y_test, y_pred, zero_division=1)
-        f1 = f1_score(self.y_test, y_pred, zero_division=1)
+        # Calculate precision, recall, and F1 score for each class (None means for each class separately)
+        precision = precision_score(self.y_test, y_pred, average=None, zero_division=1)
+        recall = recall_score(self.y_test, y_pred, average=None, zero_division=1)
+        f1 = f1_score(self.y_test, y_pred, average=None, zero_division=1)
+    
+        # Calculate weighted average precision, recall, and F1 score
+        precision_avg = precision_score(self.y_test, y_pred, average='weighted', zero_division=1)
+        recall_avg = recall_score(self.y_test, y_pred, average='weighted', zero_division=1)
+        f1_avg = f1_score(self.y_test, y_pred, average='weighted', zero_division=1)
     
         # Generate a classification report
         classification_rep = classification_report(self.y_test, y_pred)
@@ -134,22 +140,27 @@ class ClassificationModels:
         # Confusion matrix
         cm = confusion_matrix(self.y_test, y_pred)
     
-        # ROC Curve and AUC score
+        # ROC Curve and AUC score (only if model supports predict_proba)
         try:
-            y_probs = model.predict_proba(self.X_test)[:, 1]  # Get probabilities for the positive class
-            auc = roc_auc_score(self.y_test, y_probs)
+            auc = roc_auc_score(self.y_test, model.predict_proba(self.X_test), multi_class='ovr')  
         except AttributeError:
-            auc = "Model does not support probability prediction"
+            auc = "Model does not support probability prediction"  
     
-        # Cross-validation scores
+        # Cross-validation scores 
         cross_val_scores = cross_val_score(model, self.X_train, self.y_train, cv=5)
     
         # Save the evaluation metrics to a text file
-        os.makedirs("evaluation_results", exist_ok=True)
+        os.makedirs("evaluation_results", exist_ok=True)  
         with open(f"evaluation_results/evaluation_{self.model_name}.txt", "w") as file:
-            file.write(f"Precision: {precision}\n")
-            file.write(f"Recall: {recall}\n")
-            file.write(f"F1-score: {f1}\n\n")
+            file.write("Precision for each class:\n")
+            file.write(f"{precision}\n\n")
+            file.write("Recall for each class:\n")
+            file.write(f"{recall}\n\n")
+            file.write("F1-score for each class:\n")
+            file.write(f"{f1}\n\n")
+            file.write(f"Average Precision: {precision_avg}\n")
+            file.write(f"Average Recall: {recall_avg}\n")
+            file.write(f"Average F1-score: {f1_avg}\n\n")
             file.write("Classification Report:\n")
             file.write(classification_rep)
             file.write("Confusion Matrix:\n")
@@ -162,41 +173,49 @@ class ClassificationModels:
     
         # Plot and save confusion matrix
         plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1], yticklabels=[0, 1])
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=list(set(self.y_test)), yticklabels=list(set(self.y_test)))
         plt.title("Confusion Matrix")
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
-        plt.savefig(f"evaluation_results/confusion_matrix_{self.model_name}.png")
+        plt.savefig(f"evaluation_results/confusion_matrix_{self.model_name}.png")  
         plt.close()
     
         # Plot and save ROC curve
-        self.plot_roc_curve_binary(model)
+        self.plot_roc_curve_multiclass(model)
     
-    def plot_roc_curve_binary(self, model):
+    def plot_roc_curve_multiclass(self, model):
         """
-        Plot the ROC curve for binary classification.
-    
+        Plot the ROC curve for multi-class classification.
+
         Args:
         - model: The trained model to evaluate.
         """
-        try:
-            y_probs = model.predict_proba(self.X_test)[:, 1]  # Get probabilities for the positive class
-            fpr, tpr, _ = roc_curve(self.y_test, y_probs)
-            auc_score = roc_auc_score(self.y_test, y_probs)
+        # Get predicted probabilities for each class
+        y_probs = model.predict_proba(self.X_test)
+        
+        # Binarize the test labels for multi-class ROC curve
+        y_test_bin = label_binarize(self.y_test, classes=list(set(self.y_test)))  
     
-            plt.figure(figsize=(8, 6))
-            plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {auc_score:.2f})')
-            plt.plot([0, 1], [0, 1], 'k--', label='Random (AUC = 0.5)')
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title('ROC Curve for Binary Classification')
-            plt.legend(loc='lower right')
-            plt.savefig(f"evaluation_results/roc_curve_{self.model_name}.png")
-            plt.close()
+        plt.figure(figsize=(8, 6))  
+        fpr, tpr, roc_auc = {}, {}, {}
+        
+        # Iterate over each class to calculate FPR, TPR, and AUC for the ROC curve
+        for i in range(y_test_bin.shape[1]):  
+            fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_probs[:, i])  
+            roc_auc[i] = auc(fpr[i], tpr[i])  
+            plt.plot(fpr[i], tpr[i], label=f'Class {i} (AUC = {roc_auc[i]:.2f})')  
     
-            print("ROC curve saved.")
-        except AttributeError:
-            print("Model does not support probability prediction. ROC curve not generated.")
+        # Plot the ROC curve
+        plt.plot([0, 1], [0, 1], 'k--', label='Random (AUC = 0.5)')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('ROC Curve for Multi-Class')
+        plt.legend(loc='lower right')
+        plt.show()  
+
+        # Save the ROC curve
+        plt.savefig(f"evaluation_results/roc_curve_{self.model_name}.png") 
+        plt.close() 
 
 
 

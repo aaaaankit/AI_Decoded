@@ -23,9 +23,9 @@ import Classification_models
 
 # make class with Classification_models as parent class
 class DecisionTreeTrainer(Classification_models.ClassificationModels):
-    def __init__(self, X_train, y_train, X_test, y_test, model_path=None, evaluation_results_path=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_path=None, evaluation_results=None):
         modelName = 'DecisionTreeClassifier'
-        super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results_path)
+        super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
 
         self.model = DecisionTreeClassifier(max_depth=10, random_state=42)
     

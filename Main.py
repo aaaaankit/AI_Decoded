@@ -23,38 +23,39 @@ import DecisionTree # TODO WHY IMPORT NOT WORKING
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-df = pd.read_csv('Dataset/propublica_data_for_fairml.csv')
+df = pd.read_csv('Dataset/cox-violent-parsed_filt_processed.csv')
+df = df.dropna(subset=["score_text"])
 
 
 relevant = ["sex","age","race","juv_fel_count","juv_misd_count","juv_other_count",
-            "priors_count","days_b_screening_arrest","c_jail_in","c_jail_out","c_days_from_compas",
-            "c_charge_degree","c_charge_desc","event"]
+            "c_charge_degree","r_charge_degree","r_days_from_arrest",
+           "is_recid","vr_charge_degree","event"]
 
-relevant = df.columns.to_list()
-target = "Two_yr_Recidivism"
-relevant.remove(target)  
+#  "is_violent_recid",
+
+target = "score_text"
 
 
-class_names = ["Negative", "Neutral", "Positive"]
-class_names = ["0", "1"]
+class_names = ["Low", "Medium", "High"]
+class_names = ["0", "1", "2"]
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
 y = df[target]
 df.drop(target, axis=1, inplace=True)
-processor_simplified = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=False, encoder_enabled=False, imputer_enabled=False)
+processor_simplified = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=False, encoder_enabled=True, imputer_enabled=True)
 (X_train, X_test, y_train, y_test) = processor_simplified.process_data()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results_path="Eval")
+rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
 
 rf.train_random_forest()
 rf.evaluate_random_forest()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results_path="Eval")
+dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
 
 dt.train_decision_tree()
 dt.evaluate_decision_tree()

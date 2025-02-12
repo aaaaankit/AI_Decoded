@@ -110,3 +110,88 @@ target = "is_recid"
         # Save the ROC curve
         plt.savefig(f"evaluation_results/roc_curve_{self.model_name}.png") 
         plt.close() 
+
+
+    def evaluate_model(self, model):
+        """
+        Evaluate the model using various evaluation metrics (precision, recall, F1 score, etc.).
+    
+        Args:
+        - model: The trained model to evaluate.
+        """
+        y_pred = model.predict(self.X_test)
+        
+        # Calculate precision, recall, and F1 score for binary classification
+        precision = precision_score(self.y_test, y_pred, zero_division=1)
+        recall = recall_score(self.y_test, y_pred, zero_division=1)
+        f1 = f1_score(self.y_test, y_pred, zero_division=1)
+    
+        # Generate a classification report
+        classification_rep = classification_report(self.y_test, y_pred)
+    
+        # Confusion matrix
+        cm = confusion_matrix(self.y_test, y_pred)
+    
+        # ROC Curve and AUC score
+        try:
+            y_probs = model.predict_proba(self.X_test)[:, 1]  # Get probabilities for the positive class
+            auc = roc_auc_score(self.y_test, y_probs)
+        except AttributeError:
+            auc = "Model does not support probability prediction"
+    
+        # Cross-validation scores
+        cross_val_scores = cross_val_score(model, self.X_train, self.y_train, cv=5)
+    
+        # Save the evaluation metrics to a text file
+        os.makedirs("evaluation_results", exist_ok=True)
+        with open(f"evaluation_results/evaluation_{self.model_name}.txt", "w") as file:
+            file.write(f"Precision: {precision}\n")
+            file.write(f"Recall: {recall}\n")
+            file.write(f"F1-score: {f1}\n\n")
+            file.write("Classification Report:\n")
+            file.write(classification_rep)
+            file.write("Confusion Matrix:\n")
+            file.write(f"{cm}\n\n")
+            file.write(f"AUC: {auc}\n")
+            file.write(f"Cross-Validation Scores: {cross_val_scores}\n")
+            file.write(f"Average Cross-Validation Score: {cross_val_scores.mean()}\n")
+    
+        print(f"Evaluation metrics saved to 'evaluation_results/evaluation_{self.model_name}.txt'")
+    
+        # Plot and save confusion matrix
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1], yticklabels=[0, 1])
+        plt.title("Confusion Matrix")
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        plt.savefig(f"evaluation_results/confusion_matrix_{self.model_name}.png")
+        plt.close()
+    
+        # Plot and save ROC curve
+        self.plot_roc_curve_binary(model)
+    
+    def plot_roc_curve_binary(self, model):
+        """
+        Plot the ROC curve for binary classification.
+    
+        Args:
+        - model: The trained model to evaluate.
+        """
+        try:
+            y_probs = model.predict_proba(self.X_test)[:, 1]  # Get probabilities for the positive class
+            fpr, tpr, _ = roc_curve(self.y_test, y_probs)
+            auc_score = roc_auc_score(self.y_test, y_probs)
+    
+            plt.figure(figsize=(8, 6))
+            plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {auc_score:.2f})')
+            plt.plot([0, 1], [0, 1], 'k--', label='Random (AUC = 0.5)')
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curve for Binary Classification')
+            plt.legend(loc='lower right')
+            plt.savefig(f"evaluation_results/roc_curve_{self.model_name}.png")
+            plt.close()
+    
+            print("ROC curve saved.")
+        except AttributeError:
+            print("Model does not support probability prediction. ROC curve not generated.")

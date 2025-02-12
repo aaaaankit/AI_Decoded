@@ -2,6 +2,7 @@ from sklearn.calibration import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import KNNImputer
+import pandas as pd
 
 class DataProcessor:
     """
@@ -64,18 +65,24 @@ class DataProcessor:
     def fill_missing_values(self):
         """
         Handles missing values in the dataset.
-        
+
         For numerical columns, missing values are imputed using KNN imputation.
         For categorical columns, missing values are filled with the string 'Unknown'.
         """
-        knn_imputer = KNNImputer(n_neighbors=5)  
-
-        # Iterate through the columns in the dataframe
-        for col in self.df.columns.tolist():
+        knn_imputer = KNNImputer(n_neighbors=5)
+        print(len(self.df.columns))
+        for col in self.df.columns:
             if self.df[col].dtype == 'object':  
                 self.df[col].fillna('Unknown', inplace=True)  
-            elif self.df[col].dtype in ['int64', 'float64']: 
-                self.df[col] = knn_imputer.fit_transform(self.df[[col]])  
+            elif self.df[col].dtype in ['int64', 'float64']:
+                if self.df[col].isna().sum() > 0:  # Only apply imputation if NaN values exist
+                    print("Use knn imputer")
+                    print(col)
+                    self.df[[col]] = knn_imputer.fit_transform(self.df[[col]])
+
+        # Ensure no remaining NaN values
+        #self.df.fillna(method='ffill', inplace=False)  # Forward fill as a backup
+        #self.df.fillna(method='bfill', inplace=False)  # Backward fill if forward fill isn't possible
 
     def normalize_numerical_columns(self):
         """
@@ -135,10 +142,14 @@ class DataProcessor:
         :return: X_train, X_test, y_train, y_test - The processed and split datasets.
         """
         self.preprocess_data()
+        print("here")
         if self.imputer_enabled:
             self.fill_missing_values()
+            print("here2")
         if self.normalizer_enabled:
             self.normalize_numerical_columns()
+            print("here3")
         if self.encoder_enabled:
             self.encode_categorical_features()
+            print("here4")
         return self.split_data()
