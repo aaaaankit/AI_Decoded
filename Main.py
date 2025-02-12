@@ -54,9 +54,9 @@ rf.evaluate_random_forest()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-# dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results_path="Eval")
+dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results_path="Eval")
 
-# dt.train_random_forest()
-# dt.evaluate_random_forest()
+dt.train_decision_tree()
+dt.evaluate_decision_tree()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
