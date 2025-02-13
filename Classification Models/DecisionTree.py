@@ -27,7 +27,7 @@ class DecisionTreeTrainer(Classification_models.ClassificationModels):
         modelName = 'DecisionTreeClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
 
-        self.model = DecisionTreeClassifier(max_depth=30, random_state=42)
+        self.model = DecisionTreeClassifier(max_depth=10, random_state=42)
     
     def train_decision_tree(self):
         """
