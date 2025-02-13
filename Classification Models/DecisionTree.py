@@ -53,5 +53,7 @@ class DecisionTreeTrainer(Classification_models.ClassificationModels):
         """
         self.model = self.load_model(self.model)
     
-
+    def get_model(self):
+        """Return the trained Random Forest model."""
+        return self.model
 

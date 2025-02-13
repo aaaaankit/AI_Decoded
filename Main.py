@@ -10,16 +10,20 @@ path_Random_forest = cwd / 'Classification Models' / 'Uninterpretable Models'
 
 path_Decision_tree = cwd / 'Classification Models'
 
+path_post_hoc = cwd / 'Post-Hoc Analysis'
+
 print(path_Decision_tree)
 
 sys.path
 sys.path.append(str(path_Data_processing))
 sys.path.append(str(path_Random_forest))
 sys.path.append(str(path_Decision_tree))
+sys.path.append(str(path_post_hoc))
 
 import DataProcessor
 import Randomforest
 import DecisionTree # TODO WHY IMPORT NOT WORKING
+import SHAP_posthoc
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -51,10 +55,14 @@ processor_raw = DataProcessor.DataProcessor(df, y, relevant, normalizer_enabled=
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
-
-rf.train_random_forest()
-rf.evaluate_random_forest()
+#rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
+#
+#rf.train_random_forest()
+#rf.evaluate_random_forest()
+#trained_rf = rf.get_model()
+#
+#shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test,y_test, "evaluation_results")
+#shap_rf.perform_shap_analysis()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -62,5 +70,10 @@ dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_pa
 
 dt.train_decision_tree()
 dt.evaluate_decision_tree()
+trained_dt = dt.get_model()
+
+shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test,y_test, "evaluation_results")
+shap_dt.perform_shap_analysis()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
+

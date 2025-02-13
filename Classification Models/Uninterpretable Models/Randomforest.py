@@ -64,3 +64,7 @@ class RandomForestTrainer(Classification_models.ClassificationModels):
         Load a pre-trained Random Forest model using the load_model method from the parent class.
         """
         self.model = self.load_model(self.model)
+
+    def get_model(self):
+        """Return the trained Random Forest model."""
+        return self.model

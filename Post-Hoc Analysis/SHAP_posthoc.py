@@ -2,6 +2,7 @@ import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from sklearn.model_selection import train_test_split
 
 
     
@@ -20,7 +21,7 @@ class SHAPAnalysis:
         perform_shap_analysis(): 
             Perform SHAP analysis and generate SHAP plots (summary, feature importance, dependence, force).
     """
-    def __init__(self, model, X_train, X_test, shap_results_path):
+    def __init__(self, model, X_train, X_test, y_test, shap_results_path):
         """
         Initializes the SHAPAnalysis class with the given model, training and test datasets, and results path.
         
@@ -33,59 +34,57 @@ class SHAPAnalysis:
         self.model = model
         self.X_train = X_train
         self.X_test = X_test
+        self.y_test = y_test
         self.shap_results_path = shap_results_path
 
-    def perform_shap_analysis(self):
+    def perform_shap_analysis(self, subset_percentage=0.1):
         """
-        Perform SHAP analysis on the given model and data, generating multiple SHAP plots such as:
-        - Summary plot
-        - Feature importance bar plot
-        - Dependence plot for a specified feature
-        - Force plot for the first test instance
-        
-        The generated plots are saved as image files in the specified `shap_results_path` directory.
-        
-        Steps:
-            1. Initialize a SHAP explainer using the TreeExplainer for tree-based models.
-            2. Generate SHAP values for the test data.
-            3. Create and save a summary plot showing the global impact of features.
-            4. Create and save a feature importance plot (bar plot).
-            5. Create and save a dependence plot for a specified feature.
-            6. Create and save a force plot for the first instance in the test data.
+        Perform SHAP analysis on a stratified subset of the test data, generating multiple SHAP plots.
+        A random subset of the test data is selected using stratified sampling to increase speed.
+
+        Args:
+            subset_percentage (float): The percentage of the test set to use for SHAP analysis (0.1 = 10%).
 
         Returns:
             None: The function saves the plots to the given directory.
         """
 
+        # Stratified Sampling to create a subset
+        X_subset, _, y_subset, _ = train_test_split(self.X_test, self.y_test, test_size=(1 - subset_percentage), stratify=self.y_test, random_state=42)
+
         feature_names = self.X_test.columns
-        
+
         # Initialize SHAP explainer for the model
         explainer = shap.TreeExplainer(self.model)
-        
-        # Calculate SHAP values for the test data
-        shap_values = explainer.shap_values(self.X_test)
+
+        # Calculate SHAP values for the stratified subset
+        shap_values = explainer.shap_values(X_subset)
 
         # Summary Plot
-        os.makedirs(f"{self.shap_results_path}", exist_ok=True)  
-        plt.figure(figsize=(10, 8))  
-        shap.summary_plot(shap_values[1], self.X_test, feature_names=feature_names)  
-        plt.savefig(f"{self.shap_results_path}/shap_summary_plot.png") 
-        plt.close()  
+        os.makedirs(f"{self.shap_results_path}", exist_ok=True)
+        plt.figure(figsize=(10, 8))
+        shap.summary_plot(shap_values[1], X_subset, feature_names=feature_names)
+        plt.savefig(f"evaluation_results/shap_summary_plot.png")
+        plt.show()
+        plt.close()
 
         # Feature Importance Bar Plot
-        plt.figure(figsize=(10, 6))  
-        shap.summary_plot(shap_values[1], self.X_test, plot_type="bar", feature_names=feature_names)  
-        plt.savefig(f"{self.shap_results_path}/shap_feature_importance.png")  
-        plt.close()  
+        plt.figure(figsize=(10, 6))
+        shap.summary_plot(shap_values[1], X_subset, plot_type="bar", feature_names=feature_names)
+        plt.savefig(f"evaluation_results/shap_feature_importance.png")
+        plt.show()
+        plt.close()
 
         # Dependence Plot for a selected feature (first feature in this case)
-        feature_to_analyze = feature_names[0]  
-        plt.figure(figsize=(8, 6)) 
-        shap.dependence_plot(feature_to_analyze, shap_values[1], self.X_test, feature_names=feature_names) 
-        plt.savefig(f"{self.shap_results_path}/shap_dependence_{feature_to_analyze}.png") 
-        plt.close()  
+        feature_to_analyze = feature_names[0]
+        plt.figure(figsize=(8, 6))
+        shap.dependence_plot(feature_to_analyze, shap_values[1], X_subset, feature_names=feature_names)
+        plt.savefig(f"evaluation_results/shap_dependence_{feature_to_analyze}.png")
+        plt.show()
+        plt.close()
 
         # Force Plot for the first test instance
-        shap.force_plot(explainer.expected_value[1], shap_values[1][0, :], self.X_test.iloc[0, :], feature_names=feature_names, matplotlib=True)  
-        plt.savefig(f"{self.shap_results_path}/shap_force_plot.png")  
-        plt.close()  
+        shap.force_plot(explainer.expected_value[1], shap_values[1][0, :], X_subset.iloc[0, :], feature_names=feature_names, matplotlib=True)
+        plt.savefig(f"evaluation_results/shap_force_plot.png")
+        plt.show()
+        plt.close()
