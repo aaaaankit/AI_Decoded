@@ -35,7 +35,7 @@ class DataProcessor:
             Runs the full preprocessing pipeline: filters columns, handles missing values, normalizes and encodes features, and splits the data.
     """
     
-    def __init__(self, df, y, relevant_columns, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True):
+    def __init__(self, df, y, relevant_columns, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True, safe_processed_data_enabled=False):
         """
         Initializes the DataProcessor with the given dataset and settings.
 
@@ -52,6 +52,7 @@ class DataProcessor:
         self.encoder_enabled = encoder_enabled
         self.imputer_enabled = imputer_enabled
         self.relevant_columns = relevant_columns
+        self.safe_processed_data_enabled = safe_processed_data_enabled
 
     def preprocess_data(self):
         """
@@ -114,6 +115,9 @@ class DataProcessor:
                     self.df = pd.get_dummies(self.df, columns=[col], drop_first=True)  
                 else:  
                     self.df[col] = le.fit_transform(self.df[col]) 
+                    
+    def safe_processed_data(self):
+        self.df.to_csv("cox-violent-parsed_filt_processed.csv", index=False)
 
     def split_data(self, test_size=0.2, random_state=42):
         """
@@ -152,4 +156,6 @@ class DataProcessor:
         if self.encoder_enabled:
             self.encode_categorical_features()
             print("here4")
+        if self.safe_processed_data_enabled:
+            self.safe_processed_data()
         return self.split_data()
