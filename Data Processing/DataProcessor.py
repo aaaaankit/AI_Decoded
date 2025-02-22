@@ -35,7 +35,7 @@ class DataProcessor:
             Runs the full preprocessing pipeline: filters columns, handles missing values, normalizes and encodes features, and splits the data.
     """
     
-    def __init__(self, df, y, relevant_columns, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True, safe_processed_data_enabled=False):
+    def __init__(self, df, y, relevant_columns, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True, safe_processed_data_enabled=False, one_hot_columns=None, label_mappings=None):
         """
         Initializes the DataProcessor with the given dataset and settings.
 
@@ -53,6 +53,8 @@ class DataProcessor:
         self.imputer_enabled = imputer_enabled
         self.relevant_columns = relevant_columns
         self.safe_processed_data_enabled = safe_processed_data_enabled
+        self.one_hot_columns = one_hot_columns
+        self.label_mappings = label_mappings
 
     def preprocess_data(self):
         """
@@ -98,23 +100,39 @@ class DataProcessor:
             if self.df[col].dtype in ['int64', 'float64']: 
                 self.df[col] = scaler.fit_transform(self.df[[col]]) 
 
-    def encode_categorical_features(self):
+    def encode_categorical_features(self, one_hot_columns=None, label_mappings=None):
         """
         Encodes categorical features in the dataset.
         
         This method applies:
-        - One-Hot Encoding for nominal categorical features (with more than two unique values).
-        - Label Encoding for binary or ordinal categorical features (with two unique values).
+        - One-Hot Encoding for specified columns (nominal features).
+        - Custom Label Encoding for other categorical features (binary or ordinal features).
+        
+        :param one_hot_columns: List of column names to apply One-Hot Encoding.
+                                If None, all columns with more than 2 unique values will be one-hot encoded.
+        :param label_mappings: Dictionary of column names with custom Label Encoding mappings.
+                               If None, default Label Encoding will be applied.
         """
-        le = LabelEncoder()  
+        le = LabelEncoder()
+
+        # Default to One-Hot Encoding columns with more than 2 unique values, if no specific columns are provided
+        if one_hot_columns is None:
+            one_hot_columns = [col for col in self.df.columns if self.df[col].dtype == 'object' and len(self.df[col].unique()) > 2]
 
         # Loop through all categorical columns to apply encoding
         for col in self.df.columns:
-            if self.df[col].dtype == 'object':  
-                if len(self.df[col].unique()) > 2:  
-                    self.df = pd.get_dummies(self.df, columns=[col], drop_first=True)  
-                else:  
-                    self.df[col] = le.fit_transform(self.df[col]) 
+            if self.df[col].dtype == 'object':
+                if col in one_hot_columns:  # Apply One-Hot Encoding
+                    self.df = pd.get_dummies(self.df, columns=[col], drop_first=True)
+                else:  # Apply Label Encoding
+                    if label_mappings and col in label_mappings:
+                        # Apply custom mapping for Label Encoding
+                        self.df[col] = self.df[col].map(label_mappings[col])
+                    else:
+                        # Apply default Label Encoding if no mapping is provided
+                        self.df[col] = le.fit_transform(self.df[col])
+
+        return self.df
                     
     def safe_processed_data(self):
         self.df.to_csv("cox-violent-parsed_filt_processed.csv", index=False)
@@ -154,7 +172,7 @@ class DataProcessor:
             self.normalize_numerical_columns()
             print("here3")
         if self.encoder_enabled:
-            self.encode_categorical_features()
+            self.encode_categorical_features(self.one_hot_columns, self.label_mappings)
             print("here4")
         if self.safe_processed_data_enabled:
             self.safe_processed_data()
