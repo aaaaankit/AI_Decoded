@@ -25,3 +25,10 @@ class AnchorAnalysis:
         print('Coverage: %.2f' % explanation.coverage)
         # print instance like we did before
         instance = self.X_test[test_idx]
+
+    def perform_anchor_analysis_instance(self, instance):
+        explanation = self.explainer.explain(instance.reshape(1, -1)) 
+        print('Anchor: %s' % (' AND '.join(explanation.anchor)))
+        print('Precision: %.2f' % explanation.precision)
+        print('Coverage: %.2f' % explanation.coverage)
+        # print instance like we did before
