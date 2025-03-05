@@ -34,13 +34,9 @@ import DecisionTree # TODO WHY IMPORT NOT WORKING
 import MLPClassifier
 import SHAP_posthoc
 import Anchor_posthoc
+import LIME_posthoc
 #import Vizualize_tree
 #from Vizualize_tree import VizTree
-
-
-# Data transformer setup
-#****************************************************************************************************************************************
-#----------------------------------------------------------------------------------------------------------------------------------------
 
 df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
 df = df.dropna(subset=["score_text"])
@@ -59,16 +55,20 @@ df.drop(target, axis=1, inplace=True)
 one_hot_columns = ['race']
 
 
-processor = DataTransformer.DataTransformer(
-    df=df,
-    y=y,
-    relevant_columns=relevant,
-    onehot_cols=one_hot_columns,
-)
 
-# Fit and save the pipeline
-processor.fit_pipeline()
-processor.save_pipeline("DataTransformer.pkl")
+# Data transformer setup
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+#processor = DataTransformer.DataTransformer(
+#    df=df,
+#    y=y,
+#    relevant_columns=relevant,
+#    onehot_cols=one_hot_columns,
+#)
+#
+#processor.fit_pipeline()
+#processor.save_pipeline("DataTransformer.pkl")
 
 
 # Data transformer loading
@@ -103,32 +103,32 @@ X_train, X_test, y_train, y_test = processor2.split_data()
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
-
-rf.train_random_forest()
-rf.evaluate_random_forest()
-trained_rf = rf.get_model()
-rf.save_random_forest()
-
-
-#----------------------------------------------------------------------------------------------------------------------------------------
-
-dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
-
-dt.train_decision_tree()
-dt.evaluate_decision_tree()
-trained_dt = dt.get_model()
-dt.save_decision_tree()
-
-
-#----------------------------------------------------------------------------------------------------------------------------------------
-
-nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
-
-nn.train_neural_network()
-nn.evaluate_neural_network()
-trained_nn = nn.get_model()
-nn.save_neural_network()
+#rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test_RandomForest", evaluation_results="Eval")
+#
+#rf.train_random_forest()
+#rf.evaluate_random_forest()
+#trained_rf = rf.get_model()
+#rf.save_random_forest()
+#
+#
+##----------------------------------------------------------------------------------------------------------------------------------------
+#
+#dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test_DecisionTree", evaluation_results="Eval")
+#
+#dt.train_decision_tree()
+#dt.evaluate_decision_tree()
+#trained_dt = dt.get_model()
+#dt.save_decision_tree()
+#
+#
+##----------------------------------------------------------------------------------------------------------------------------------------
+#
+#nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Test_NeuralNet", evaluation_results="Eval")
+#
+#nn.train_neural_network()
+#nn.evaluate_neural_network()
+#trained_nn = nn.get_model()
+#nn.save_neural_network()
 
 
 
@@ -136,18 +136,23 @@ nn.save_neural_network()
 # Model loading
 #****************************************************************************************************************************************
 
-rf2 = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
+rf2 = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test_RandomForest", evaluation_results="Eval2")
 rf2.load_random_forest()
+#rf2.evaluate_random_forest()
+trained_rf2 = rf2.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-dt2 = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
+dt2 = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test_DecisionTree", evaluation_results="Eval2")
 dt2.load_decision_tree()
+#dt2.evaluate_decision_tree()
+trained_dt2 = dt2.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-nn2 = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Test", evaluation_results="Eval")
-nn2.load_neural_network()
+#nn2 = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Test_NeuralNet", evaluation_results="Eval2")
+#nn2.load_neural_network()
+#nn2.evaluate_neural_network()
 
 
 
@@ -160,7 +165,7 @@ nn2.load_neural_network()
 
 
 """
-# Model explaining (SHAP)
+# General Model explanations (SHAP)
 #****************************************************************************************************************************************
 
 shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test,y_test, "evaluation_results")
@@ -178,3 +183,33 @@ shap_dt.perform_shap_analysis()
 shap_mlp = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test,y_test, "evaluation_results")
 shap_mlp.perform_shap_analysis()
 """
+
+
+#***************************************************************************************************************************************
+#***************************************************************************************************************************************
+#***************************************************************************************************************************************
+#***************************************************************************************************************************************
+
+
+# Local (prediction level explanations) LIME
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+lime_rf = LIME_posthoc.LimeAnalysis(trained_rf2, X_train, X_test, y_test, processor2.get_feature_names(), y.unique().tolist())
+lime_rf.perform_lime_analysis(5)
+
+lime_dt = LIME_posthoc.LimeAnalysis(trained_dt2, X_train, X_test, y_test, processor2.get_feature_names(), y.unique().tolist())
+lime_dt.perform_lime_analysis(5)
+
+#lime_nn = LIME_posthoc.LimeAnalysis(nn, X_train, X_test, y_test, processor2.get_feature_names(), y.unique().tolist())
+#lime_nn.perform_lime_analysis(5)
+
+
+# Local (prediction level explanations) Anchors
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_rf2, X_train, X_test, y_test, processor2.get_feature_names(), y.unique().tolist())
+anchor_rf.perform_anchor_analysis(5)
+
+anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_dt2, X_train, X_test, y_test, processor2.get_feature_names(), y.unique().tolist())
+anchor_rf.perform_anchor_analysis(5)
