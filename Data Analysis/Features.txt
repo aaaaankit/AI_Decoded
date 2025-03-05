@@ -1,0 +1,25 @@
+important features:
+sex
+age
+rage
+
+juv_fel_count	 
+juv_misd_count	 	or priors_count
+juv_other_count  
+
+c_charge_degree	
+r_charge_degree
+r_days_from_arrest
+is_violent_recid
+vr_charge_degree
+
+
+
+target: decile score or score_text
+
+
+
+description unnecessary:
+vr_charge_desc
+c_charge_desc
+r_charge_desc
