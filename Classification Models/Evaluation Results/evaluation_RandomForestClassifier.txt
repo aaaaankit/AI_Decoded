@@ -1,31 +1,31 @@
 Precision for each class:
-[0.7038835  0.70471842 0.60069444]
+[0.72228844 0.7253886  0.61011236]
 
 Recall for each class:
-[0.62098501 0.80103806 0.52371342]
+[0.64882227 0.80738178 0.54793138]
 
 F1-score for each class:
-[0.65984073 0.74979757 0.55956873]
+[0.68358714 0.76419214 0.57735247]
 
-Average Precision: 0.676331542517158
-Average Recall: 0.6799672041541405
-Average F1-score: 0.675313703868547
+Average Precision: 0.693375945389492
+Average Recall: 0.6966384257993987
+Average F1-score: 0.693013353188599
 
 Classification Report:
               precision    recall  f1-score   support
 
-        High       0.70      0.62      0.66       934
-         Low       0.70      0.80      0.75      1734
-      Medium       0.60      0.52      0.56       991
+        High       0.72      0.65      0.68       934
+         Low       0.73      0.81      0.76      1734
+      Medium       0.61      0.55      0.58       991
 
-    accuracy                           0.68      3659
-   macro avg       0.67      0.65      0.66      3659
-weighted avg       0.68      0.68      0.68      3659
+    accuracy                           0.70      3659
+   macro avg       0.69      0.67      0.68      3659
+weighted avg       0.69      0.70      0.69      3659
 Confusion Matrix:
-[[ 580  222  132]
- [ 132 1389  213]
- [ 112  360  519]]
+[[ 606  196  132]
+ [ 119 1400  215]
+ [ 114  334  543]]
 
-AUC: 0.8409316536841475
-Cross-Validation Scores: [0.67338572 0.66279467 0.685685   0.68363512 0.66097061]
-Average Cross-Validation Score: 0.6732942241618272
+AUC: 0.8540279439630795
+Cross-Validation Scores: [0.68226853 0.6805603  0.68192689 0.691493   0.67566644]
+Average Cross-Validation Score: 0.6823830315298136

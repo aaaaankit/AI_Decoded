@@ -1,0 +1,31 @@
+Precision for each class:
+[0.53942428 0.62003454 0.39705882]
+
+Recall for each class:
+[0.4614561  0.82814302 0.21796165]
+
+F1-score for each class:
+[0.49740335 0.7091358  0.28143322]
+
+Average Precision: 0.5390673594801895
+Average Recall: 0.5692812243782455
+Average F1-score: 0.5392502140265671
+
+Classification Report:
+              precision    recall  f1-score   support
+
+        High       0.54      0.46      0.50       934
+         Low       0.62      0.83      0.71      1734
+      Medium       0.40      0.22      0.28       991
+
+    accuracy                           0.57      3659
+   macro avg       0.52      0.50      0.50      3659
+weighted avg       0.54      0.57      0.54      3659
+Confusion Matrix:
+[[ 431  337  166]
+ [ 136 1436  162]
+ [ 232  543  216]]
+
+AUC: 0.7242760357064784
+Cross-Validation Scores: [0.57840793 0.56884182 0.58045781 0.565767   0.55741627]
+Average Cross-Validation Score: 0.5701781630521313

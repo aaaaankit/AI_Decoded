@@ -65,14 +65,14 @@ class SHAPAnalysis:
         os.makedirs(f"{self.shap_results_path}", exist_ok=True)
         plt.figure(figsize=(10, 8))
         shap.summary_plot(shap_values[1], X_subset, feature_names=self.feature_names)
-        plt.savefig(f"evaluation_results/shap_summary_plot.png")
+        plt.savefig(f"{self.shap_results_path}/shap_summary_plot.png")
         plt.show()
         plt.close()
 
         # Feature Importance Bar Plot
         plt.figure(figsize=(10, 6))
         shap.summary_plot(shap_values[1], X_subset, plot_type="bar", feature_names=self.feature_names)
-        plt.savefig(f"evaluation_results/shap_feature_importance.png")
+        plt.savefig(f"{self.shap_results_path}/shap_feature_importance.png")
         plt.show()
         plt.close()
 
@@ -80,12 +80,12 @@ class SHAPAnalysis:
         feature_to_analyze = self.feature_names[0]
         plt.figure(figsize=(8, 6))
         shap.dependence_plot(feature_to_analyze, shap_values[1], X_subset, feature_names=self.feature_names)
-        plt.savefig(f"evaluation_results/shap_dependence_{feature_to_analyze}.png")
+        plt.savefig(f"{self.shap_results_path}/shap_dependence_{feature_to_analyze}.png")
         plt.show()
         plt.close()
 
         # Force Plot for the first test instance
         shap.force_plot(explainer.expected_value[1], shap_values[1][0, :], X_subset.iloc[0, :], feature_names=self.feature_names, matplotlib=True)
-        plt.savefig(f"evaluation_results/shap_force_plot.png")
+        plt.savefig(f"{self.shap_results_path}/shap_force_plot.png")
         plt.show()
         plt.close()

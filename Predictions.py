@@ -1,8 +1,18 @@
+import json
+from matplotlib import pyplot as plt
+import seaborn as sns
+import pandas as pd
+import sys
+import os
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+from sklearn.tree import export_text
+
 root = Path(__file__).parent
 cwd = Path(__file__).parent
 path_Data_processing = cwd / 'Data Processing'
 path_Random_forest = cwd / 'Classification Models' / 'Uninterpretable Models'
-path_Decision_tree = cwd / 'Classification Models'
+path_Decision_tree = cwd / 'Classification Models' / 'Interpretable Models'
 path_post_hoc = cwd / 'Model Explanations' / 'Post-Hoc Analysis'
 path_inherent = cwd / 'Model Explanations' / 'Inherently Interpretable Analysis'
 
@@ -23,17 +33,6 @@ import Anchor_posthoc
 import LIME_posthoc
 #import Vizualize_tree
 #from Vizualize_tree import VizTree
-
-import json
-from matplotlib import pyplot as plt
-import seaborn as sns
-import pandas as pd
-import sys
-import os
-from pathlib import Path
-from sklearn.model_selection import train_test_split
-from sklearn.tree import export_text
-
 
 
 
@@ -66,7 +65,7 @@ processor = DataTransformer.DataTransformer(
     onehot_cols=one_hot_columns,
 )
 
-processor.load_pipeline("DataTransformer.pkl")
+processor.load_pipeline("Data Processing/DataTransformer.pkl")
 
 X_train, X_test, y_train, y_test = processor.split_data()
 
@@ -74,25 +73,35 @@ X_train, X_test, y_train, y_test = processor.split_data()
 
 # Model loading
 #****************************************************************************************************************************************
-
-rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Test_RandomForest", evaluation_results="Eval2")
+#----------------------------------------------------------------------------------------------------------------------------------------
+rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_RandomForest")
 rf.load_random_forest()
-#rf.evaluate_random_forest()
 trained_rf = rf.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Test_DecisionTree", evaluation_results="Eval2")
+dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_DecisionTree")
 dt.load_decision_tree()
-#dt.evaluate_decision_tree()
 trained_dt = dt.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Test_NeuralNet", evaluation_results="Eval2")
+ebm = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
+ebm.load_decision_tree()
+trained_ebm = ebm.get_model()
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_NeuralNet")
 nn.load_neural_network()
 nn.evaluate_neural_network()
 
+
+
+# Local (prediction level explanations) Inherent
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+inherent_ebm = trained_ebm.explain_local(X_test[:5], y_test[:5])
 
 
 # Local (prediction level explanations) LIME
@@ -112,15 +121,19 @@ lime_nn.perform_lime_analysis(5)
 # Local (prediction level explanations) Anchors
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-
 anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 anchor_rf.perform_anchor_analysis(5)
 
-anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_rf.perform_anchor_analysis(5)
+anchor_dt = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
+anchor_dt.perform_anchor_analysis(5)
 
-anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_rf.perform_anchor_analysis(5)
+anchor_nn = Anchor_posthoc.AnchorAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
+anchor_nn.perform_anchor_analysis(5)
+
+
+
+
+
 
 def read_json(json_string):
     data_point = json.loads(json_string)
