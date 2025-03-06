@@ -24,7 +24,14 @@ class LimeAnalysis:
         explanation = self.explainer.explain_instance(instance, self.model.predict_proba, num_features=len(self.feature_names))
         
         print('LIME Explanation for instance %d:' % test_idx)
-        print('Prediction: %s' % self.class_names[np.argmax(self.model.predict_proba(instance.reshape(1, -1)))])
+        try:
+            # Attempt to use predict_proba
+            prediction = self.model.predict_proba(instance.reshape(1, -1))
+            print('Prediction: %s' % self.class_names[np.argmax(prediction)])
+        except AttributeError:
+            # If predict_proba is not available, fall back to predict
+            prediction = self.model.predict(instance.reshape(1, -1))
+            print('Prediction: %s' % self.class_names[prediction[0]])
 
         # Print the explanation
         print('LIME Explanation:')
@@ -39,7 +46,14 @@ class LimeAnalysis:
         explanation = self.explainer.explain_instance(instance, self.model.predict_proba, num_features=len(self.feature_names))
         
         print('LIME Explanation for the given instance:')
-        print('Prediction: %s' % self.class_names[np.argmax(self.model.predict_proba(instance.reshape(1, -1)))])
+        try:
+            # Attempt to use predict_proba
+            prediction = self.model.predict_proba(instance.reshape(1, -1))
+            print('Prediction: %s' % self.class_names[np.argmax(prediction)])
+        except AttributeError:
+            # If predict_proba is not available, fall back to predict
+            prediction = self.model.predict(instance.reshape(1, -1))
+            print('Prediction: %s' % self.class_names[prediction[0]])
 
         # Print the explanation
         print('LIME Explanation:')

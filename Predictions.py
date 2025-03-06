@@ -1,9 +1,6 @@
 import json
-from matplotlib import pyplot as plt
-import seaborn as sns
 import pandas as pd
 import sys
-import os
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.tree import export_text
@@ -23,7 +20,6 @@ sys.path.append(str(path_Decision_tree))
 sys.path.append(str(path_post_hoc))
 sys.path.append(str(path_inherent))
 
-import DataProcessor
 import DataTransformer
 import Randomforest
 import DecisionTree 
@@ -53,7 +49,7 @@ def read_json(file_path):
 
 
 
-df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
+df = pd.read_csv('AI_Decoded/Dataset/cox-violent-parsed_filt.csv')
 df = df.dropna(subset=["score_text"])
 df['race'] = df['race'].str.replace('African-American', 'African American')     # replace African-American with African American in the race column
 
@@ -67,7 +63,7 @@ y = df[target]
 df.drop(target, axis=1, inplace=True)
 
 # Define the columns to One-Hot Encode
-one_hot_columns = ['race']
+one_hot_columns = ['race', 'sex']
 
 
 # Data transformer loading
@@ -81,7 +77,7 @@ processor = DataTransformer.DataTransformer(
     onehot_cols=one_hot_columns,
 )
 
-processor.load_pipeline("Data Processing/DataTransformer.pkl")
+processor.load_pipeline("AI_Decoded/Data Processing/DataTransformer.pkl")
 
 X_train, X_test, y_train, y_test = processor.split_data()
 
@@ -90,42 +86,46 @@ X_train, X_test, y_train, y_test = processor.split_data()
 # Model loading
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_RandomForest")
+rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_RandomForest")
 rf.load_random_forest()
 trained_rf = rf.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_DecisionTree")
+dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_DecisionTree")
 dt.load_decision_tree()
 trained_dt = dt.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting", evaluation_results="Eval")
+ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_ExplainableBoosting")
 ebm.load_ebm()
 trained_ebm = ebm.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_NeuralNet")
+nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_NeuralNet")
 nn.load_neural_network()
-nn.evaluate_neural_network()
+trained_nn = nn.get_model()
 
 
 
 # Data entry
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-data_point = read_json('dataPoint.txt')
+data_point = read_json('AI_Decoded/dataPoint.txt')
 new_data_df = pd.DataFrame([data_point])
 transformed_data = processor.pipeline.transform(new_data_df)
+transformed_data = transformed_data.reshape(-1)
+#print(X_test[2].shape)
+#print(transformed_data.shape)
+
 
 
 # Local (prediction level explanations) Inherent
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-inherent_ebm = trained_ebm.explain_local(X_test[:5], y_test[:5])
+#inherent_ebm = trained_ebm.explain_local(X_test[:5], y_test[:5])
 
 
 # Local (prediction level explanations) LIME
@@ -137,20 +137,26 @@ lime_rf.perform_lime_analysis_instance(transformed_data)
 lime_dt = LIME_posthoc.LimeAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 lime_dt.perform_lime_analysis_instance(transformed_data)
 
-lime_nn = LIME_posthoc.LimeAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       #TODO
+lime_ebm = LIME_posthoc.LimeAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
+lime_ebm.perform_lime_analysis_instance(transformed_data)
+
+lime_nn = LIME_posthoc.LimeAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       #TODO
 lime_nn.perform_lime_analysis_instance(transformed_data)
 
 
 # Local (prediction level explanations) SHAP
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
+shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "RandomForest")
 shap_rf.perform_shap_local_explanation_instance(transformed_data)
 
-shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
+shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Decision Tree")
 shap_dt.perform_shap_local_explanation_instance(transformed_data)
 
-shap_nn = SHAP_posthoc.SHAPAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")       #TODO
+shap_ebm = SHAP_posthoc.SHAPAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), "Explainable Boosted Machine")
+shap_ebm.perform_shap_local_explanation_instance(transformed_data)
+
+shap_nn = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), "MLP NN")       #TODO
 shap_nn.perform_shap_local_explanation_instance(transformed_data)
 
 
@@ -163,11 +169,8 @@ anchor_rf.perform_anchor_analysis_instance(transformed_data)
 anchor_dt = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 anchor_dt.perform_anchor_analysis_instance(transformed_data)
 
-anchor_nn = Anchor_posthoc.AnchorAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
+anchor_ebm = Anchor_posthoc.AnchorAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
+anchor_ebm.perform_anchor_analysis_instance(transformed_data)
+
+anchor_nn = Anchor_posthoc.AnchorAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 anchor_nn.perform_anchor_analysis_instance(transformed_data)
-
-
-
-
-
-
