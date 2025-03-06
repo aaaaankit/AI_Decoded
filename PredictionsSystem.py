@@ -1,12 +1,6 @@
-import json
-from matplotlib import pyplot as plt
-import seaborn as sns
 import pandas as pd
 import sys
-import os
 from pathlib import Path
-from sklearn.model_selection import train_test_split
-from sklearn.tree import export_text
 
 root = Path(__file__).parent
 cwd = Path(__file__).parent
@@ -23,7 +17,6 @@ sys.path.append(str(path_Decision_tree))
 sys.path.append(str(path_post_hoc))
 sys.path.append(str(path_inherent))
 
-import DataProcessor
 import DataTransformer
 import Randomforest
 import DecisionTree 
@@ -100,7 +93,7 @@ class Predictor:
 
         self.processor = DataTransformer.DataTransformer(
             df=df,
-            y=y,
+            y=self.y,
             relevant_columns=relevant,
             onehot_cols=one_hot_columns,
         )
@@ -109,7 +102,7 @@ class Predictor:
 
         self.X_train, self.X_test, self.y_train, self.y_test = self.processor.split_data()
         new_data_df = pd.DataFrame([data_point])
-        self.transformed_data = self.processor.pipeline.transform(new_data_df)
+        self.transformed_data = self.processor.pipeline.transform(new_data_df).reshape(-1)
 
 
 
@@ -138,7 +131,7 @@ class Predictor:
             }
             load_methods[self.classification_model]()
 
-            self.trained_model = model if self.classification_model == "Multi-layered Perceptron" else model.get_model()
+            self.trained_model = model.get_model()
             return self.trained_model.predict(self.transformed_data)
 
     def performance_evaluation(self):
