@@ -126,13 +126,13 @@ trained_ebm.explain_global()
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
 shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
-shap_rf.perform_shap_analysis 
+shap_rf.perform_shap_general_explanation() 
 
 shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
-shap_dt.perform_shap_analysis()
+shap_dt.perform_shap_general_explanation()
 
 shap_mlp = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test,y_test, "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
-shap_mlp.perform_shap_analysis()
+shap_mlp.perform_shap_general_explanation()
 
 
 

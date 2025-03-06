@@ -34,6 +34,21 @@ import LIME_posthoc
 #import Vizualize_tree
 #from Vizualize_tree import VizTree
 
+def read_json(file_path):
+    """
+    Reads a JSON-formatted text file and parses it into a Python dictionary.
+
+    Args:
+        file_path (str): The path to the text file containing JSON data.
+
+    Returns:
+        dict: Parsed JSON data.
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        json_string = file.read()  # Read the entire content of the file
+        data_point = json.loads(json_string)  # Parse the JSON string
+    return data_point
+
 
 
 
@@ -98,6 +113,14 @@ nn.evaluate_neural_network()
 
 
 
+# Data entry
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+data_point = read_json('dataPoint.txt')
+new_data_df = pd.DataFrame([data_point])
+transformed_data = processor.pipeline.transform(new_data_df)
+
+
 # Local (prediction level explanations) Inherent
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
@@ -108,33 +131,42 @@ inherent_ebm = trained_ebm.explain_local(X_test[:5], y_test[:5])
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
 lime_rf = LIME_posthoc.LimeAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-lime_rf.perform_lime_analysis(5)
+lime_rf.perform_lime_analysis_instance(transformed_data)
 
 lime_dt = LIME_posthoc.LimeAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-lime_dt.perform_lime_analysis(5)
+lime_dt.perform_lime_analysis_instance(transformed_data)
 
 lime_nn = LIME_posthoc.LimeAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       #TODO
-lime_nn.perform_lime_analysis(5)
+lime_nn.perform_lime_analysis_instance(transformed_data)
 
+
+# Local (prediction level explanations) SHAP
+#****************************************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------------------------------
+shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
+shap_rf.perform_shap_local_explanation_instance(transformed_data)
+
+shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
+shap_dt.perform_shap_local_explanation_instance(transformed_data)
+
+shap_nn = SHAP_posthoc.SHAPAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")       #TODO
+shap_nn.perform_shap_local_explanation_instance(transformed_data)
 
 
 # Local (prediction level explanations) Anchors
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
 anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_rf.perform_anchor_analysis(5)
+anchor_rf.perform_anchor_analysis_instance(transformed_data)
 
 anchor_dt = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_dt.perform_anchor_analysis(5)
+anchor_dt.perform_anchor_analysis_instance(transformed_data)
 
 anchor_nn = Anchor_posthoc.AnchorAnalysis(nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_nn.perform_anchor_analysis(5)
+anchor_nn.perform_anchor_analysis_instance(transformed_data)
 
 
 
 
 
 
-def read_json(json_string):
-    data_point = json.loads(json_string)
-    return data_point

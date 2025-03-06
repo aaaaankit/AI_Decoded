@@ -38,31 +38,28 @@ class SHAPAnalysis:
         self.feature_names = feature_names
         self.shap_results_path = shap_results_path
 
-    def perform_shap_analysis(self, subset_percentage=0.1):
+
+    def perform_shap_general_explanation(self, subset_percentage=0.1):
         """
-        Perform SHAP analysis on a stratified subset of the test data, generating multiple SHAP plots.
-        A random subset of the test data is selected using stratified sampling to increase speed.
+        Perform SHAP analysis to generate general explanations (global feature importance).
 
         Args:
             subset_percentage (float): The percentage of the test set to use for SHAP analysis (0.1 = 10%).
 
         Returns:
-            None: The function saves the plots to the given directory.
+            None: Saves the plots to the given directory.
         """
-
         # Stratified Sampling to create a subset
-        X_subset, _, y_subset, _ = train_test_split(self.X_test, self.y_test, test_size=(1 - subset_percentage), stratify=self.y_test, random_state=42)
+        X_subset, _, y_subset, _ = train_test_split(self.X_test, self.y_test, 
+                                                    test_size=(1 - subset_percentage), 
+                                                    stratify=self.y_test, 
+                                                    random_state=42)
 
-        
-
-        # Initialize SHAP explainer for the model
+        # Initialize SHAP explainer
         explainer = shap.TreeExplainer(self.model)
-
-        # Calculate SHAP values for the stratified subset
         shap_values = explainer.shap_values(X_subset)
 
         # Summary Plot
-        os.makedirs(f"{self.shap_results_path}", exist_ok=True)
         plt.figure(figsize=(10, 8))
         shap.summary_plot(shap_values[1], X_subset, feature_names=self.feature_names)
         plt.savefig(f"{self.shap_results_path}/shap_summary_plot.png")
@@ -76,16 +73,58 @@ class SHAPAnalysis:
         plt.show()
         plt.close()
 
-        # Dependence Plot for a selected feature (first feature in this case)
+    def perform_shap_local_explanation(self, instance_index=0):
+        """
+        Perform SHAP analysis to generate local explanations for a specific instance.
+
+        Args:
+            instance_index (int): The index of the test instance to analyze.
+
+        Returns:
+            None: Saves the plots to the given directory.
+        """
+        # Initialize SHAP explainer
+        explainer = shap.TreeExplainer(self.model)
+        shap_values = explainer.shap_values(self.X_test)
+
+        # Dependence Plot for the first feature
         feature_to_analyze = self.feature_names[0]
         plt.figure(figsize=(8, 6))
-        shap.dependence_plot(feature_to_analyze, shap_values[1], X_subset, feature_names=self.feature_names)
+        shap.dependence_plot(feature_to_analyze, shap_values[1], self.X_test, feature_names=self.feature_names)
         plt.savefig(f"{self.shap_results_path}/shap_dependence_{feature_to_analyze}.png")
         plt.show()
         plt.close()
 
-        # Force Plot for the first test instance
-        shap.force_plot(explainer.expected_value[1], shap_values[1][0, :], X_subset.iloc[0, :], feature_names=self.feature_names, matplotlib=True)
-        plt.savefig(f"{self.shap_results_path}/shap_force_plot.png")
+        # Force Plot for a single test instance
+        shap.force_plot(explainer.expected_value[1], shap_values[1][instance_index, :], 
+                        self.X_test.iloc[instance_index, :], feature_names=self.feature_names, 
+                        matplotlib=True)
+        plt.savefig(f"{self.shap_results_path}/shap_force_plot_instance_{instance_index}.png")
         plt.show()
         plt.close()
+
+    def perform_shap_local_explanation_instance(self, instance):
+        """
+        Perform SHAP analysis for a given instance (external data).
+
+        Args:
+            instance (array-like): The feature values of the instance.
+
+        Returns:
+            None: Saves the plots to the given directory.
+        """
+        # Initialize SHAP explainer
+        explainer = shap.TreeExplainer(self.model)
+
+        # Compute SHAP values
+        shap_values = explainer.shap_values(instance)
+
+        # Generate and save force plot
+        shap.force_plot(explainer.expected_value[1], shap_values[1], 
+                        instance, feature_names=self.feature_names, 
+                        matplotlib=True)
+        plt.savefig(f"{self.shap_results_path}/shap_force_plot_custom_instance.png")
+        plt.show()
+        plt.close()
+
+        print("SHAP explanation generated for the provided instance.")
