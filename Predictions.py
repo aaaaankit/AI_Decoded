@@ -27,6 +27,7 @@ import DataProcessor
 import DataTransformer
 import Randomforest
 import DecisionTree 
+import Explainable_Boosting_Machines
 import MLPClassifier
 import SHAP_posthoc
 import Anchor_posthoc
@@ -101,8 +102,8 @@ trained_dt = dt.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
 
-ebm = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
-ebm.load_decision_tree()
+ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting", evaluation_results="Eval")
+ebm.load_ebm()
 trained_ebm = ebm.get_model()
 
 #----------------------------------------------------------------------------------------------------------------------------------------
