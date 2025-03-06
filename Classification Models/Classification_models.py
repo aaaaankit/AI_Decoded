@@ -37,7 +37,7 @@ class ClassificationModels:
             plot_roc_curve_multiclass(model): 
                 Plots and saves the ROC curve for multi-class classification.
     """
-    def __init__(self, X_train, y_train, X_test, y_test, model_name, model_path=None, evaluation_results=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_name, model_path, evaluation_results):
         """
         Initializes the ClassificationModels class.
 
@@ -151,7 +151,7 @@ class ClassificationModels:
     
         # Save the evaluation metrics to a text file
         os.makedirs("evaluation_results", exist_ok=True)  
-        with open(f"evaluation_results/evaluation_{self.model_name}.txt", "w") as file:
+        with open(f"{self.evaluation_results}/evaluation_{self.model_name}.txt", "w") as file:
             file.write("Precision for each class:\n")
             file.write(f"{precision}\n\n")
             file.write("Recall for each class:\n")
@@ -177,7 +177,7 @@ class ClassificationModels:
         plt.title("Confusion Matrix")
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
-        plt.savefig(f"evaluation_results/confusion_matrix_{self.model_name}.png")  
+        plt.savefig(f"{self.evaluation_results}/confusion_matrix_{self.model_name}.png")  
         plt.close()
     
         # Plot and save ROC curve
@@ -211,10 +211,8 @@ class ClassificationModels:
         plt.ylabel('True Positive Rate')
         plt.title('ROC Curve for Multi-Class')
         plt.legend(loc='lower right')
+        plt.savefig(f"{self.evaluation_results}/roc_curve_{self.model_name}.png") 
         plt.show()  
-
-        # Save the ROC curve
-        plt.savefig(f"evaluation_results/roc_curve_{self.model_name}.png") 
         plt.close() 
 
 

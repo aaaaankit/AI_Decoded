@@ -38,12 +38,12 @@ class NeuralNetworkTrainer(Classification_models.ClassificationModels):
         load_neural_network(): 
             Loads a pre-trained Neural Network model using the `load_model` method from the parent class.
     """
-    def __init__(self, X_train, y_train, X_test, y_test, model_path=None, evaluation_results=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_path, evaluation_results="AI_Decoded/Classification Models/Evaluation Results"):
         modelName = 'MLPClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
         
-        self.model = MLPClassifier(hidden_layer_sizes=(256, 128, 64), activation='relu', solver='adam',
-                           random_state=42, max_iter=2000, learning_rate_init=0.001, alpha=0.0001)
+        self.model = MLPClassifier(hidden_layer_sizes = (32, 16), activation='relu', solver='adam',             #hidden_layer_sizes=(256, 128, 64)
+                           random_state=42, max_iter=1000, learning_rate_init=0.001, alpha=0.0001)              #max_iter=2000
 
 
     def train_neural_network(self):

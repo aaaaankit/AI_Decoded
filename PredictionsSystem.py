@@ -114,82 +114,72 @@ class Predictor:
 
 
     def classification(self):
-        if self.classification_model == "Multi-layered Perceptron":
-            model = MLPClassifier.NeuralNetworkTrainer(self.X_train, self.y_train, self.X_test, self.y_test, model_path="Classification Models/Saved Models/Test_NeuralNet")
-            model.load_neural_network()
-            self.trained_model = model
-        elif self.classification_model == "RandomForest":
-            model = Randomforest.RandomForestTrainer(self.X_train, self.y_train, self.X_test, self.y_test, model_path="Classification Models/Saved Models/Test_RandomForest")
-            model.load_random_forest()
-            self.trained_model = model.get_model()
-        elif self.classification_model == "Explainable Boosting Machine":
-            model = Explainable_Boosting_Machines.ExplainableBoostingTrainer(self.X_train, self.y_train, self.X_test, self.y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting", evaluation_results="Eval")
-            model.load_ebm()
-            self.trained_model = model.get_model()
-        elif self.classification_model == "Decision Tree":
-            model = DecisionTree.DecisionTreeTrainer(self.X_train, self.y_train, self.X_test, self.y_test, model_path="Classification Models/Saved Models/Test_DecisionTree")
-            model.load_decision_tree()
-            self.trained_model = model.get_model()
+        model_classes = {
+            "Multi-layered Perceptron": MLPClassifier.NeuralNetworkTrainer,
+            "RandomForest": Randomforest.RandomForestTrainer,
+            "Explainable Boosting Machine": Explainable_Boosting_Machines.ExplainableBoostingTrainer,
+            "Decision Tree": DecisionTree.DecisionTreeTrainer,
+        }
 
-        prediction = self.trained_model.predict(self.transformed_data)
-        return prediction
+        model_paths = {
+            "Multi-layered Perceptron": "Classification Models/Saved Models/Test_NeuralNet",
+            "RandomForest": "Classification Models/Saved Models/Test_RandomForest",
+            "Explainable Boosting Machine": "Classification Models/Saved Models/Test_ExplainableBoosting",
+            "Decision Tree": "Classification Models/Saved Models/Test_DecisionTree",
+        }
+
+        if self.classification_model in model_classes:
+            model = model_classes[self.classification_model](self.X_train, self.y_train, self.X_test, self.y_test, model_path=model_paths[self.classification_model])
+            load_methods = {
+                "Multi-layered Perceptron": model.load_neural_network,
+                "RandomForest": model.load_random_forest,
+                "Explainable Boosting Machine": model.load_ebm,
+                "Decision Tree": model.load_decision_tree,
+            }
+            load_methods[self.classification_model]()
+
+            self.trained_model = model if self.classification_model == "Multi-layered Perceptron" else model.get_model()
+            return self.trained_model.predict(self.transformed_data)
 
     def performance_evaluation(self):
-        if self.classification_model == "Multi-layered Perceptron":
-            model_evaluation_path = ["Classification Models/Evaluation Results/confusion_matrix_MLPClassifier.png",
-                                     "Classification Models/Evaluation Results/roc_curve_MLPClassifier.png",
-                                     "Classification Models/Evaluation Results/evaluation_MLPClassifier.txt"]
-            return model_evaluation_path
-        elif self.classification_model == "RandomForest":
-            model_evaluation_path = ["Classification Models/Evaluation Results/confusion_matrix_RandomForestClassifier.png",
-                                     "Classification Models/Evaluation Results/roc_curve_RandomForestClassifier.png",
-                                     "Classification Models/Evaluation Results/evaluation_RandomForestClassifier.txt"]
-            return model_evaluation_path
-        elif self.classification_model == "Explainable Boosting Machine":
-            model_evaluation_path = ["Classification Models/Evaluation Results/confusion_matrix_ExplainableBoostingClassifier.png",
-                                     "Classification Models/Evaluation Results/roc_curve_ExplainableBoostingClassifier.png",
-                                     "Classification Models/Evaluation Results/evaluation_ExplainableBoostingClassifier.txt"]
-            return model_evaluation_path
-        elif self.classification_model == "Decision Tree":
-            model_evaluation_path = ["Classification Models/Evaluation Results/confusion_matrix_DecisionTreeClassifier.png",
-                                     "Classification Models/Evaluation Results/roc_curve_DecisionTreeClassifier.png",
-                                     "Classification Models/Evaluation Results/evaluation_DecisionTreeClassifier.txt"]
-            return model_evaluation_path 
-        
-    def global_explanation(self):
-        if self.global_explainer == "SHAP":
-            if self.classification_model == "Multi-layered Perceptron":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-            elif self.classification_model == "RandomForest":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-            elif self.classification_model == "Explainable Boosting Machine":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-            elif self.classification_model == "Decision Tree":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-        elif self.global_explainer == "Inherent":
-            if self.classification_model not in self.inherent_models:
-                return Exception
-        
-            if self.classification_model == "Explainable Boosting Machine":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-            elif self.classification_model == "Decision Tree":
-                return "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/....."
-    
-    def local_explanation(self):
-        if self.global_explainer == "SHAP":
-            shap_model = SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results")
-            return shap_model.perform_shap_local_explanation_instance(self.transformed_data)
-        elif self.global_explainer == "Inherent":
-            if self.classification_model not in self.inherent_models:
-                return Exception
+        base_path = "Classification Models/Evaluation Results"
+        model_suffixes = {
+            "Multi-layered Perceptron": "MLPClassifier",
+            "RandomForest": "RandomForestClassifier",
+            "Explainable Boosting Machine": "ExplainableBoostingClassifier",
+            "Decision Tree": "DecisionTreeClassifier",
+        }
 
-            if self.classification_model == "Decision Tree":
-                return #TODO
-            elif self.classification_model == "Explainable Boosting Machine":
-                return #TODO
-        elif self.global_explainer == "LIME":
-            lime_model = LIME_posthoc.LimeAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist())
-            return lime_model.perform_lime_analysis_instance(self.transformed_data)
-        elif self.global_explainer == "Anchors":
-            anchor_rf = Anchor_posthoc.AnchorAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist())
-            return anchor_rf.perform_anchor_analysis_instance(self.transformed_data)
+        if self.classification_model in model_suffixes:
+            suffix = model_suffixes[self.classification_model]
+            return [f"{base_path}/confusion_matrix_{suffix}.png",
+                    f"{base_path}/roc_curve_{suffix}.png",
+                    f"{base_path}/evaluation_{suffix}.txt"]
+
+    def global_explanation(self):
+        explanation_paths = {
+            "SHAP": {
+                "Multi-layered Perceptron": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+                "RandomForest": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+                "Explainable Boosting Machine": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+                "Decision Tree": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+            },
+            "Inherent": {
+                "Explainable Boosting Machine": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+                "Decision Tree": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
+            }
+        }
+
+        return explanation_paths.get(self.global_explainer, {}).get(self.classification_model, Exception)
+
+    def local_explanation(self):
+        explainer_classes = {
+            "SHAP": lambda: SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results").perform_shap_local_explanation_instance(self.transformed_data),
+            "LIME": lambda: LIME_posthoc.LimeAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_lime_analysis_instance(self.transformed_data),
+            "Anchors": lambda: Anchor_posthoc.AnchorAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_anchor_analysis_instance(self.transformed_data),
+        }
+
+        if self.global_explainer == "Inherent" and self.classification_model not in self.inherent_models:
+            return Exception
+
+        return explainer_classes.get(self.global_explainer, lambda: None)()

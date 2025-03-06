@@ -1,3 +1,4 @@
+import numpy as np
 import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -21,7 +22,7 @@ class SHAPAnalysis:
         perform_shap_analysis(): 
             Perform SHAP analysis and generate SHAP plots (summary, feature importance, dependence, force).
     """
-    def __init__(self, model, X_train, X_test, y_test, feature_names, shap_results_path):
+    def __init__(self, model, X_train, X_test, y_test, feature_names,model_name, shap_results_path="AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results"):
         """
         Initializes the SHAPAnalysis class with the given model, training and test datasets, and results path.
         
@@ -37,6 +38,7 @@ class SHAPAnalysis:
         self.y_test = y_test
         self.feature_names = feature_names
         self.shap_results_path = shap_results_path
+        self.model_name = model_name
 
 
     def perform_shap_general_explanation(self, subset_percentage=0.1):
@@ -55,23 +57,51 @@ class SHAPAnalysis:
                                                     stratify=self.y_test, 
                                                     random_state=42)
 
-        # Initialize SHAP explainer
-        explainer = shap.TreeExplainer(self.model)
-        shap_values = explainer.shap_values(X_subset)
+        explainer = None
+        shap_values = None
+
+        try:
+            # Try using TreeExplainer (for tree-based models)
+            explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(X_subset)
+        except Exception as e:
+            print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
+            try:
+                # Use DeepExplainer (for neural networks)
+                explainer = shap.DeepExplainer(self.model, X_subset)  # Use a small background set
+                shap_values = explainer.shap_values(X_subset)
+            except Exception as de:
+                print(f"DeepExplainer also failed, switching to KernelExplainer: {de}")
+                try:
+                    # Use KernelExplainer as a last resort (for any model)
+                    def model_predict(X):
+                        return self.model.predict_proba(X)
+
+                    background = X_subset  # Use a small subset for efficiency
+                    explainer = shap.KernelExplainer(model_predict, background)
+                    shap_values = explainer.shap_values(X_subset)  # Use a subset to speed up computation
+                except Exception as ke:
+                    print(f"KernelExplainer also failed: {ke}")
+                    return  # Stop execution if all explainer methods fail
+                
+        print(f"SHAP values shape: {np.array(shap_values).shape}")
+        print(f"X_subset shape: {X_subset.shape}")
 
         # Summary Plot
         plt.figure(figsize=(10, 8))
-        shap.summary_plot(shap_values[1], X_subset, feature_names=self.feature_names)
-        plt.savefig(f"{self.shap_results_path}/shap_summary_plot.png")
+        shap.summary_plot(shap_values[1], X_subset, feature_names=self.feature_names, show=False)
+        plt.savefig(f"{self.shap_results_path}/shap_summary_plot_{self.model_name}.png", dpi=300, bbox_inches="tight")
         plt.show()
         plt.close()
 
         # Feature Importance Bar Plot
         plt.figure(figsize=(10, 6))
-        shap.summary_plot(shap_values[1], X_subset, plot_type="bar", feature_names=self.feature_names)
-        plt.savefig(f"{self.shap_results_path}/shap_feature_importance.png")
+        shap.summary_plot(shap_values[1], X_subset, plot_type="bar", feature_names=self.feature_names, show=False)
+        plt.savefig(f"{self.shap_results_path}/shap_feature_importance_{self.model_name}.png", dpi=300, bbox_inches="tight")
         plt.show()
         plt.close()
+
+        print("SHAP general explanation generated successfully.")
 
     def perform_shap_local_explanation(self, instance_index=0):
         """
@@ -84,14 +114,24 @@ class SHAPAnalysis:
             None: Saves the plots to the given directory.
         """
         # Initialize SHAP explainer
-        explainer = shap.TreeExplainer(self.model)
-        shap_values = explainer.shap_values(self.X_test)
+        try:
+            # Try using TreeExplainer (for tree-based models)
+            explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(self.X_test[instance_index])
+        except Exception as e:
+            print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
+            try:
+                # Use DeepExplainer (for neural networks)
+                explainer = shap.DeepExplainer(self.model, np.array([self.X_test[instance_index]]))  
+                shap_values = explainer.shap_values(np.array([self.X_test[instance_index]]))[0]  
+            except Exception as de:
+                print(f"DeepExplainer also failed: {de}")
+                return  # Stop execution if neither works
 
         # Dependence Plot for the first feature
         feature_to_analyze = self.feature_names[0]
         plt.figure(figsize=(8, 6))
         shap.dependence_plot(feature_to_analyze, shap_values[1], self.X_test, feature_names=self.feature_names)
-        plt.savefig(f"{self.shap_results_path}/shap_dependence_{feature_to_analyze}.png")
         plt.show()
         plt.close()
 
@@ -99,7 +139,6 @@ class SHAPAnalysis:
         shap.force_plot(explainer.expected_value[1], shap_values[1][instance_index, :], 
                         self.X_test.iloc[instance_index, :], feature_names=self.feature_names, 
                         matplotlib=True)
-        plt.savefig(f"{self.shap_results_path}/shap_force_plot_instance_{instance_index}.png")
         plt.show()
         plt.close()
 
@@ -114,16 +153,24 @@ class SHAPAnalysis:
             None: Saves the plots to the given directory.
         """
         # Initialize SHAP explainer
-        explainer = shap.TreeExplainer(self.model)
-
-        # Compute SHAP values
-        shap_values = explainer.shap_values(instance)
+        try:
+            # Try using TreeExplainer (for tree-based models)
+            explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(instance)
+        except Exception as e:
+            print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
+            try:
+                # Use DeepExplainer (for neural networks)
+                explainer = shap.DeepExplainer(self.model, np.array([instance]))  
+                shap_values = explainer.shap_values(np.array([instance]))[0]  
+            except Exception as de:
+                print(f"DeepExplainer also failed: {de}")
+                return  # Stop execution if neither works
 
         # Generate and save force plot
         shap.force_plot(explainer.expected_value[1], shap_values[1], 
                         instance, feature_names=self.feature_names, 
                         matplotlib=True)
-        plt.savefig(f"{self.shap_results_path}/shap_force_plot_custom_instance.png")
         plt.show()
         plt.close()
 

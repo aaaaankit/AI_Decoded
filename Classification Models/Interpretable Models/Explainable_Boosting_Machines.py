@@ -16,7 +16,7 @@ sys.path
 import Classification_models
 
 class ExplainableBoostingTrainer(Classification_models.ClassificationModels):
-    def __init__(self, X_train, y_train, X_test, y_test, model_path=None, evaluation_results=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_path, evaluation_results="AI_Decoded/Classification Models/Evaluation Results"):
         modelName = 'ExplainableBoostingClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
 

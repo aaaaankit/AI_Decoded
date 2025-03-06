@@ -35,7 +35,7 @@ class RandomForestTrainer(Classification_models.ClassificationModels):
         load_random_forest(): 
             Loads a pre-trained Random Forest model from the specified path using the `load_model` method from the parent class.
     """
-    def __init__(self, X_train, y_train, X_test, y_test, model_path=None, evaluation_results=None):
+    def __init__(self, X_train, y_train, X_test, y_test, model_path, evaluation_results="AI_Decoded/Classification Models/Evaluation Results"):
         modelName = 'RandomForestClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
         
