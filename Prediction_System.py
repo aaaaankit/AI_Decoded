@@ -57,7 +57,7 @@ class Predictor:
             plot_roc_curve_multiclass(model): 
                 Plots and saves the ROC curve for multi-class classification.
     """
-    def __init__(self, classification_model, local_explainer, global_explainer, data_point):
+    def __init__(self, classification_model, local_explainer, data_point):
         """
         Initializes the ClassificationModels class.
 
@@ -71,11 +71,10 @@ class Predictor:
         - evaluation_results: Optional path to save evaluation results (default is None).
         """
         self.classification_model = classification_model  
-        self.local_explainer = local_explainer  
-        self.global_explainer = global_explainer     
+        self.local_explainer = local_explainer      
         self.inherent_models = ["Decision Tree", "Explainable Boosting Machine"]
 
-        df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
+        df = pd.read_csv('AI_Decoded/Dataset/cox-violent-parsed_filt.csv')
         df = df.dropna(subset=["score_text"])
         df['race'] = df['race'].str.replace('African-American', 'African American')     
 
@@ -98,7 +97,7 @@ class Predictor:
             onehot_cols=one_hot_columns,
         )
 
-        self.processor.load_pipeline("Data Processing/DataTransformer.pkl")
+        self.processor.load_pipeline("AI_Decoded/Data Processing/DataTransformer.pkl")
 
         self.X_train, self.X_test, self.y_train, self.y_test = self.processor.split_data()
         new_data_df = pd.DataFrame([data_point])
@@ -115,10 +114,10 @@ class Predictor:
         }
 
         model_paths = {
-            "Multi-layered Perceptron": "Classification Models/Saved Models/Test_NeuralNet",
-            "RandomForest": "Classification Models/Saved Models/Test_RandomForest",
-            "Explainable Boosting Machine": "Classification Models/Saved Models/Test_ExplainableBoosting",
-            "Decision Tree": "Classification Models/Saved Models/Test_DecisionTree",
+            "Multi-layered Perceptron": "AI_Decoded/Classification Models/Saved Models/Test_NeuralNet",
+            "RandomForest": "AI_Decoded/Classification Models/Saved Models/Test_RandomForest",
+            "Explainable Boosting Machine": "AI_Decoded/Classification Models/Saved Models/Test_ExplainableBoosting",
+            "Decision Tree": "AI_Decoded/Classification Models/Saved Models/Test_DecisionTree",
         }
 
         if self.classification_model in model_classes:
@@ -134,40 +133,10 @@ class Predictor:
             self.trained_model = model.get_model()
             return self.trained_model.predict(self.transformed_data)
 
-    def performance_evaluation(self):
-        base_path = "Classification Models/Evaluation Results"
-        model_suffixes = {
-            "Multi-layered Perceptron": "MLPClassifier",
-            "RandomForest": "RandomForestClassifier",
-            "Explainable Boosting Machine": "ExplainableBoostingClassifier",
-            "Decision Tree": "DecisionTreeClassifier",
-        }
-
-        if self.classification_model in model_suffixes:
-            suffix = model_suffixes[self.classification_model]
-            return [f"{base_path}/confusion_matrix_{suffix}.png",
-                    f"{base_path}/roc_curve_{suffix}.png",
-                    f"{base_path}/evaluation_{suffix}.txt"]
-
-    def global_explanation(self):
-        explanation_paths = {
-            "SHAP": {
-                "Multi-layered Perceptron": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-                "RandomForest": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-                "Explainable Boosting Machine": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-                "Decision Tree": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-            },
-            "Inherent": {
-                "Explainable Boosting Machine": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-                "Decision Tree": "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/.....",
-            }
-        }
-
-        return explanation_paths.get(self.global_explainer, {}).get(self.classification_model, Exception)
 
     def local_explanation(self):
         explainer_classes = {
-            "SHAP": lambda: SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results").perform_shap_local_explanation_instance(self.transformed_data),
+            "SHAP": lambda: SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results").perform_shap_local_explanation_instance(self.transformed_data),
             "LIME": lambda: LIME_posthoc.LimeAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_lime_analysis_instance(self.transformed_data),
             "Anchors": lambda: Anchor_posthoc.AnchorAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_anchor_analysis_instance(self.transformed_data),
         }

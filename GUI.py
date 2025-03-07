@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import numpy as np
-import shap
-import lime.lime_tabular
 import matplotlib.pyplot as plt
+import json
+import os
+import Prediction_System as Prediction_System
+import General_System as General_System
 
 class ModelExplainerGUI:
     def __init__(self, root, models):
@@ -16,7 +17,7 @@ class ModelExplainerGUI:
         
         # Center the window
         window_width = 600
-        window_height = 600
+        window_height = 750
         
         # Get screen width and height
         screen_width = self.root.winfo_screenwidth()
@@ -50,7 +51,7 @@ class ModelExplainerGUI:
 
         # Model Selection
         ttk.Label(root, text="Select Model:").grid(row=len(self.relevant_features) + 1, column=0, sticky="w", padx=10, pady=10)
-        self.model_choice = ttk.Combobox(root, values=list(self.models.keys()), width=20)
+        self.model_choice = ttk.Combobox(root, values=list(self.models), width=20)
         self.model_choice.grid(row=len(self.relevant_features) + 1, column=1, padx=10, pady=5)
         
         # Local Explanation Method Selection
@@ -76,64 +77,108 @@ class ModelExplainerGUI:
         self.explain_global_btn = ttk.Button(root, text="Explain Global", command=self.explain_global)
         self.explain_global_btn.grid(row=len(self.relevant_features) + 6, column=1, padx=10, pady=5)
 
+        # See Model Performance Button
+        ttk.Label(root, text="Model Performance:").grid(row=len(self.relevant_features) + 7, column=0, sticky="w", padx=10, pady=10)
+        self.model_performance_btn = ttk.Button(root, text="See Performance", command=self.see_model_performance)
+        self.model_performance_btn.grid(row=len(self.relevant_features) + 7, column=1, padx=10, pady=5)
+
+
     def make_prediction(self):
+        # Get the model and the explainer
         model_name = self.model_choice.get()
+        local_explainer = self.local_explainer_choice.get()
         if not model_name:
             messagebox.showerror("Error", "Please select a model.")
             return
 
         # Collect user inputs
-        try:
-            input_data = np.array([float(self.entries[feat].get()) for feat in self.relevant_features]).reshape(1, -1)
-        except ValueError:
-            messagebox.showerror("Error", "Please enter valid numerical values.")
-            return
+        self.save_user_input()
+        data_point = self.read_user_input()
 
-        model = self.models[model_name]
-        prediction = model.predict(input_data)
+        #Make prediction on the input
+        predictor = Prediction_System.Predictor(classification_model=model_name,local_explainer=local_explainer,data_point=data_point)
+        prediction = predictor.classification()
+
         messagebox.showinfo("Prediction Result", f"Predicted score_text: {prediction[0]}")
-        self.last_input = input_data
-        self.last_model = model
+
+        # Save the model and data for the explanations
+        self.last_input = data_point
+        self.last_model = model_name
 
     def explain_local(self):
         explainer_type = self.local_explainer_choice.get()
         if not explainer_type or self.last_model is None:
             messagebox.showerror("Error", "Make a prediction first and select a local explainer.")
             return
+        
+        predictor = Prediction_System.Predictor(classification_model=self.last_model,local_explainer=explainer_type,data_point=self.last_input)
+        predictor.local_explanation()
 
-        if explainer_type == "SHAP":
-            explainer = shap.TreeExplainer(self.last_model)
-            shap_values = explainer.shap_values(self.last_input)
-            shap.force_plot(explainer.expected_value[1], shap_values[1], self.last_input, matplotlib=True)
-            plt.show()
-        elif explainer_type == "LIME":
-            explainer = lime.lime_tabular.LimeTabularExplainer(self.last_input, mode='classification')
-            explanation = explainer.explain_instance(self.last_input[0], self.last_model.predict_proba)
-            explanation.show_in_notebook()
-        elif explainer_type == "Anchors":
-            messagebox.showinfo("Info", "Anchors explanation method is not implemented yet.")
 
     def explain_global(self):
         explainer_type = self.global_explainer_choice.get()
-        if not explainer_type or self.last_model is None:
-            messagebox.showerror("Error", "Make a prediction first and select a global explainer.")
+        model_name = self.model_choice.get()
+        if not explainer_type or model_name is None:
+            messagebox.showerror("Error", "Select a global explainer and a classification model.")
             return
 
-        if explainer_type == "SHAP":
-            explainer = shap.TreeExplainer(self.last_model)
-            shap_values = explainer.shap_values(self.last_input)
-            shap.summary_plot(shap_values[1], self.last_input, feature_names=self.relevant_features)
-            plt.show()
-        else:
-            messagebox.showinfo("Info", "Global explanation for selected method is not available.")
+        general_explainer = General_System.General(classification_model=model_name,global_explainer=explainer_type)
+        general_explainer.global_explanation()
 
-# Example models dictionary (replace with actual trained models)
-models = {
-    "Random Forest": None,  # Replace with trained model instance
-    "Decision Tree": None,
-    "MLP NN": None,
-    "Explainable Boosting Machine": None
-}
+    def see_model_performance(self):
+        explainer_type = self.global_explainer_choice.get()
+        model_name = self.model_choice.get()
+        if not explainer_type or model_name is None:
+            messagebox.showerror("Error", "Select a global explainer and a classification model.")
+            return
+
+        general_explainer = General_System.General(classification_model=model_name,global_explainer=explainer_type)
+        general_explainer.performance_evaluation()
+
+
+    def save_user_input(self):
+        user_data = {}
+        for feat in self.relevant_features:
+            value = self.entries[feat].get()
+            try:
+                # Convert numerical values to int/float
+                if value.replace('.', '', 1).isdigit():
+                    user_data[feat] = float(value) if '.' in value else int(value)
+                else:
+                    user_data[feat] = value  # Keep strings as they are
+            except ValueError:
+                messagebox.showerror("Error", f"Invalid input for {feat}.")
+                return
+
+        # Save to a .txt file
+        file_path = "AI_Decoded/dataPoint.txt"
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(user_data, file, indent=4)
+            messagebox.showinfo("Success", "User input saved successfully.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not save file: {e}")
+
+    def read_user_input():
+        file_path = "AI_Decoded/dataPoint.txt"
+
+        if not os.path.exists(file_path):
+            messagebox.showerror("Error", "No saved data found.")
+            return None
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                user_data = json.load(file)
+            messagebox.showinfo("Success", "User input loaded successfully.")
+            return user_data
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not read file: {e}")
+            return None
+
+
+
+
+models = ["Random Forest", "Decision Tree", "MLP NN", "Explainable Boosting Machine"]
 
 root = tk.Tk()
 app = ModelExplainerGUI(root, models)
