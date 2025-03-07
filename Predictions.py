@@ -128,7 +128,7 @@ transformed_data = transformed_data.reshape(-1)
 # Local (prediction level explanations) Inherent
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-#inherent_ebm = trained_ebm.explain_local(X_test[:5], y_test[:5])
+inherent_ebm = trained_ebm.local_explanation(transformed_data)
 
 
 # Local (prediction level explanations) LIME

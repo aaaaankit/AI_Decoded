@@ -97,15 +97,15 @@ class General:
             "SHAP": {
                 "Multi-layered Perceptron": [
                     "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_MLP NN.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_MLP NN NN.png"
+                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_MLP NN.png"
                 ],
                 "RandomForest": [
                     "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_RandomForest.png",
                     "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_RandomForest.png"
                 ],
                 "Explainable Boosting Machine": [
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/EBM_SHAP_summary.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/EBM_SHAP_dependence.png"
+                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/hap_summary_plot_Explainable Boosting Machine.png",
+                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Explainable Boosting Machinee.png"
                 ],
                 "Decision Tree": [
                     "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_Decision Tree.png",

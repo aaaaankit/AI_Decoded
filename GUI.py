@@ -110,9 +110,31 @@ class ModelExplainerGUI:
         if not explainer_type or self.last_model is None:
             messagebox.showerror("Error", "Make a prediction first and select a local explainer.")
             return
+    
+        # Get the explainer based on user selection
+        predictor = Prediction_System.Predictor(classification_model=self.last_model, local_explainer=explainer_type, data_point=self.last_input)
         
-        predictor = Prediction_System.Predictor(classification_model=self.last_model,local_explainer=explainer_type,data_point=self.last_input)
-        predictor.local_explanation()
+        if explainer_type == "Anchors":
+            # Generate the Anchor explanation
+            explanation_str = predictor.local_explanation()
+            
+            # Display the explanation in the UI
+            self.display_explanation(explanation_str)
+        else:
+            # Other explanation types (e.g., LIME, SHAP)
+            predictor.local_explanation()
+    
+    def display_explanation(self, explanation_str):
+        # Create or update a Text widget to display the explanation
+        if hasattr(self, 'explanation_text'):
+            self.explanation_text.delete(1.0, tk.END)  # Clear previous explanation
+        else:
+            # If the explanation text widget does not exist, create it
+            self.explanation_text = tk.Text(self.root, height=10, width=70)
+            self.explanation_text.grid(row=len(self.relevant_features) + 8, column=0, columnspan=2, pady=10)
+        
+        # Insert the explanation into the Text widget
+        self.explanation_text.insert(tk.END, explanation_str)
 
 
     def explain_global(self):
@@ -178,7 +200,7 @@ class ModelExplainerGUI:
 
 
 
-models = ["Random Forest", "Decision Tree", "MLP NN", "Explainable Boosting Machine"]
+models = ["RandomForest", "Decision Tree", "Multi-layered Perceptron", "Explainable Boosting Machine"]
 
 root = tk.Tk()
 app = ModelExplainerGUI(root, models)

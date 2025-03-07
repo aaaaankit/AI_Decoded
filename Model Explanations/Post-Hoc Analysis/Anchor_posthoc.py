@@ -28,7 +28,13 @@ class AnchorAnalysis:
 
     def perform_anchor_analysis_instance(self, instance):
         explanation = self.explainer.explain(instance.reshape(1, -1)) 
-        print('Anchor: %s' % (' AND '.join(explanation.anchor)))
-        print('Precision: %.2f' % explanation.precision)
-        print('Coverage: %.2f' % explanation.coverage)
-        # print instance like we did before
+
+        # Prepare the output as a string
+        explanation_str = '-------------------------------------------------------------\n'
+        explanation_str += 'Anchor: %s\n' % (' AND '.join(explanation.anchor))
+        explanation_str += 'Precision: %.2f\n' % explanation.precision
+        explanation_str += 'Coverage: %.2f\n' % explanation.coverage
+        explanation_str += '-------------------------------------------------------------\n'
+
+        # Return the explanation string
+        return explanation_str

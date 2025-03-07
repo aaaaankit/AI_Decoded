@@ -1,5 +1,6 @@
 import lime
 import lime.lime_tabular
+from matplotlib import pyplot as plt
 import numpy as np
 
 class LimeAnalysis:
@@ -49,16 +50,22 @@ class LimeAnalysis:
         try:
             # Attempt to use predict_proba
             prediction = self.model.predict_proba(instance.reshape(1, -1))
-            print('Prediction: %s' % self.class_names[np.argmax(prediction)])
+            predicted_class = np.argmax(prediction)
+            print('Prediction: %s' % self.class_names[predicted_class])
         except AttributeError:
             # If predict_proba is not available, fall back to predict
             prediction = self.model.predict(instance.reshape(1, -1))
-            print('Prediction: %s' % self.class_names[prediction[0]])
-
+            predicted_class = prediction[0]
+            print('Prediction: %s' % self.class_names[predicted_class])
+    
         # Print the explanation
         print('LIME Explanation:')
         for feature, weight in explanation.as_list():
             print(f'{feature}: {weight}')
-        #explanation.show_in_notebook(show_table=True, show_all=False)
-
+        
+        # Plot the explanation
+        fig = explanation.as_pyplot_figure()
+        plt.title(f'LIME Explanation for Class: {self.class_names[predicted_class]}')
+        plt.show()
+    
         print('LIME explanation generated successfully.')

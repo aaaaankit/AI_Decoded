@@ -1,8 +1,6 @@
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
-import seaborn as sns
-import os
 from sklearn.model_selection import train_test_split
 
 
@@ -164,8 +162,18 @@ class SHAPAnalysis:
                 explainer = shap.DeepExplainer(self.model, np.array([instance]))  
                 shap_values = explainer.shap_values(np.array([instance]))[0]  
             except Exception as de:
-                print(f"DeepExplainer also failed: {de}")
-                return  # Stop execution if neither works
+                print(f"DeepExplainer also failed, switching to KernelExplainer: {de}")
+                try:
+                    # Use KernelExplainer as a last resort (for any model)
+                    def model_predict(X):
+                        return self.model.predict_proba(X)
+
+                    background = instance  # Use the given instance as background
+                    explainer = shap.KernelExplainer(model_predict, background)
+                    shap_values = explainer.shap_values(instance)[0]  # Extract first instance's SHAP values
+                except Exception as ke:
+                    print(f"KernelExplainer also failed: {ke}")
+                    return  # Stop execution if all explainer methods fail
 
         # Generate and save force plot
         shap.force_plot(explainer.expected_value[1], shap_values[1], 
