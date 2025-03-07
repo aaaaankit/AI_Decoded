@@ -92,7 +92,7 @@ class ModelExplainerGUI:
             return
 
         # Collect user inputs
-        self.save_user_input()
+        #self.save_user_input()
         data_point = self.read_user_input()
 
         #Make prediction on the input
@@ -159,7 +159,7 @@ class ModelExplainerGUI:
         except Exception as e:
             messagebox.showerror("Error", f"Could not save file: {e}")
 
-    def read_user_input():
+    def read_user_input(self):
         file_path = "AI_Decoded/dataPoint.txt"
 
         if not os.path.exists(file_path):

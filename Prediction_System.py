@@ -85,7 +85,7 @@ class Predictor:
         target = "score_text"
 
         # Define the columns to One-Hot Encode
-        one_hot_columns = ['race']
+        one_hot_columns = ['race', 'sex']
 
         self.y = df[target]
         df.drop(target, axis=1, inplace=True)
@@ -101,11 +101,9 @@ class Predictor:
 
         self.X_train, self.X_test, self.y_train, self.y_test = self.processor.split_data()
         new_data_df = pd.DataFrame([data_point])
-        self.transformed_data = self.processor.pipeline.transform(new_data_df).reshape(-1)
+        self.transformed_data = self.processor.pipeline.transform(new_data_df)
+        self.transformed_data = self.transformed_data.reshape(-1)
 
-
-
-    def classification(self):
         model_classes = {
             "Multi-layered Perceptron": MLPClassifier.NeuralNetworkTrainer,
             "RandomForest": Randomforest.RandomForestTrainer,
@@ -122,26 +120,35 @@ class Predictor:
 
         if self.classification_model in model_classes:
             model = model_classes[self.classification_model](self.X_train, self.y_train, self.X_test, self.y_test, model_path=model_paths[self.classification_model])
-            load_methods = {
-                "Multi-layered Perceptron": model.load_neural_network,
-                "RandomForest": model.load_random_forest,
-                "Explainable Boosting Machine": model.load_ebm,
-                "Decision Tree": model.load_decision_tree,
-            }
-            load_methods[self.classification_model]()
+            if (self.classification_model == "Multi-layered Perceptron"):
+                model.load_neural_network()
+            elif (self.classification_model == "RandomForest"):
+                model.load_random_forest()
+            elif (self.classification_model == "Explainable Boosting Machine"):
+                model.load_ebm()
+            else:
+                model.load_decision_tree()
 
             self.trained_model = model.get_model()
-            return self.trained_model.predict(self.transformed_data)
+
+
+
+    def classification(self):
+            print(self.trained_model.predict([self.transformed_data]))
+            return self.trained_model.predict([self.transformed_data])
 
 
     def local_explanation(self):
         explainer_classes = {
-            "SHAP": lambda: SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results").perform_shap_local_explanation_instance(self.transformed_data),
+            "SHAP": lambda: SHAP_posthoc.SHAPAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), "De").perform_shap_local_explanation_instance(self.transformed_data),
             "LIME": lambda: LIME_posthoc.LimeAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_lime_analysis_instance(self.transformed_data),
             "Anchors": lambda: Anchor_posthoc.AnchorAnalysis(self.trained_model, self.X_train, self.X_test, self.y_test, self.processor.get_feature_names(), self.y.unique().tolist()).perform_anchor_analysis_instance(self.transformed_data),
         }
 
-        if self.global_explainer == "Inherent" and self.classification_model not in self.inherent_models:
-            return Exception
+        if self.local_explainer == "Inherent" and self.classification_model not in self.inherent_models:
+            raise ValueError(f"Inherent explanation is not supported for model: {self.classification_model}")
 
-        return explainer_classes.get(self.global_explainer, lambda: None)()
+        if self.local_explainer not in explainer_classes:
+            raise ValueError(f"Unknown local explainer: {self.local_explainer}")
+
+        return explainer_classes[self.local_explainer]()
