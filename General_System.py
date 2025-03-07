@@ -2,9 +2,11 @@ import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import matplotlib.gridspec as gridspec
 import math
 
 import numpy as np
+import re
 
 # Define root and current working directory
 root = Path(__file__).parent
@@ -81,9 +83,7 @@ class General:
             
             # Plot the ROC curve
             self.plot_images([roc_curve_path,confusion_matrix_path])
-
-            #with open(evaluation_file_path, 'r') as file:
-            #    print(file.read())
+            self.plot_metrics(self.parse_performance_metrics(evaluation_file_path))
 
 
     def global_explanation(self):
@@ -168,4 +168,58 @@ class General:
             axes.flatten()[j].axis('off')
 
         plt.tight_layout()
+        #plt.show()
+
+    def plot_metrics(self, metrics):
+        """
+        Plots performance metrics in a readable format.
+
+        Args:
+        - metrics (dict): The evaluation metrics to display.
+        """
+        # Set up the grid layout to display metrics alongside images
+        fig = plt.figure(figsize=(12, 8))
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5])
+
+        # Plot the metrics on the second subplot
+        ax = fig.add_subplot(gs[1])
+        ax.axis('off')
+
+        # Display the metrics
+        metric_text = "\n".join([f"{key}: {value}" for key, value in metrics.items()])
+        ax.text(0.5, 0.5, metric_text, ha='center', va='center', fontsize=12, wrap=True)
+
         plt.show()
+
+
+    def parse_performance_metrics(self, file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+
+        # Regex to extract the metrics
+        precision = list(map(float, re.findall(r"Precision for each class:\s*\[(.*?)\]", content)[0].split()))
+        recall = list(map(float, re.findall(r"Recall for each class:\s*\[(.*?)\]", content)[0].split()))
+        f1_score = list(map(float, re.findall(r"F1-score for each class:\s*\[(.*?)\]", content)[0].split()))
+
+        avg_precision = float(re.findall(r"Average Precision:\s*([0-9.]+)", content)[0])
+        avg_recall = float(re.findall(r"Average Recall:\s*([0-9.]+)", content)[0])
+        avg_f1_score = float(re.findall(r"Average F1-score:\s*([0-9.]+)", content)[0])
+
+        auc = float(re.findall(r"AUC:\s*([0-9.]+)", content)[0])
+        cv_scores = list(map(float, re.findall(r"Cross-Validation Scores:\s*\[(.*?)\]", content)[0].split()))
+        avg_cv_score = float(re.findall(r"Average Cross-Validation Score:\s*([0-9.]+)", content)[0])
+
+        # Creating the dictionary
+        performance_metrics = {
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
+            "average_precision": avg_precision,
+            "average_recall": avg_recall,
+            "average_f1_score": avg_f1_score,
+            "auc": auc,
+            "cross_validation_scores": cv_scores,
+            "average_cross_validation_score": avg_cv_score
+        }
+
+        return performance_metrics

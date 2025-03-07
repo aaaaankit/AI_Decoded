@@ -68,14 +68,9 @@ class ExplainableBoostingTrainer(Classification_models.ClassificationModels):
             print("Model does not support explain_local.")
 
     def global_explanation(self):
-        """
-        Generate local explanations for the first 4 test samples and display them using Plotly.
-        """
         ebm_global = self.model.explain_global()
         for index, value in enumerate(self.model.feature_bounds_):
             plotly_fig = ebm_global.visualize(index)
             #plotly_fig.write_image(f"global_images/fig_{index}.png")
             pio.show(plotly_fig)  # Display the Plotly figure
 
-
-    #def global_explanation(self):

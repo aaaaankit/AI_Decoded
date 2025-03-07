@@ -157,7 +157,6 @@ class ModelExplainerGUI:
         general_explainer = General_System.General(classification_model=model_name,global_explainer=explainer_type)
         general_explainer.performance_evaluation()
 
-
     def save_user_input(self):
         user_data = {}
         for feat in self.relevant_features:
