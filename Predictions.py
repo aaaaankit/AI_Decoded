@@ -101,7 +101,7 @@ trained_dt = dt.get_model()
 
 ##----------------------------------------------------------------------------------------------------------------------------------------
 
-ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
+ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, processor.get_feature_names(), model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
 ebm.load_ebm()
 trained_ebm = ebm.get_model()
 
@@ -128,7 +128,7 @@ transformed_data = transformed_data.reshape(-1)
 # Local (prediction level explanations) Inherent
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-inherent_ebm = trained_ebm.local_explanation(transformed_data)
+#inherent_ebm = trained_ebm.local_explanation(transformed_data)
 
 
 # Local (prediction level explanations) LIME
@@ -143,7 +143,7 @@ lime_dt.perform_lime_analysis_instance(transformed_data)
 lime_ebm = LIME_posthoc.LimeAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 lime_ebm.perform_lime_analysis_instance(transformed_data)
 
-lime_nn = LIME_posthoc.LimeAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       
+lime_nn = LIME_posthoc.LimeAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       #TODO
 lime_nn.perform_lime_analysis_instance(transformed_data)
 
 
@@ -159,8 +159,8 @@ shap_dt.perform_shap_local_explanation_instance(transformed_data)
 shap_ebm = SHAP_posthoc.SHAPAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), "Explainable Boosted Machine")
 shap_ebm.perform_shap_local_explanation_instance(transformed_data)
 
-#shap_nn = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), "MLP NN")       
-#shap_nn.perform_shap_local_explanation_instance(transformed_data)
+shap_nn = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), "MLP NN")       #TODO
+shap_nn.perform_shap_local_explanation_instance(transformed_data)
 
 
 # Local (prediction level explanations) Anchors
