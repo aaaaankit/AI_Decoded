@@ -93,13 +93,13 @@ rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_pa
 rf.load_random_forest()
 trained_rf = rf.get_model()
 
-#----------------------------------------------------------------------------------------------------------------------------------------
+##----------------------------------------------------------------------------------------------------------------------------------------
 
 dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_DecisionTree")
 dt.load_decision_tree()
 trained_dt = dt.get_model()
 
-#----------------------------------------------------------------------------------------------------------------------------------------
+##----------------------------------------------------------------------------------------------------------------------------------------
 
 ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
 ebm.load_ebm()
@@ -143,7 +143,7 @@ lime_dt.perform_lime_analysis_instance(transformed_data)
 lime_ebm = LIME_posthoc.LimeAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 lime_ebm.perform_lime_analysis_instance(transformed_data)
 
-lime_nn = LIME_posthoc.LimeAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       #TODO
+lime_nn = LIME_posthoc.LimeAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())       
 lime_nn.perform_lime_analysis_instance(transformed_data)
 
 
@@ -159,40 +159,40 @@ shap_dt.perform_shap_local_explanation_instance(transformed_data)
 shap_ebm = SHAP_posthoc.SHAPAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), "Explainable Boosted Machine")
 shap_ebm.perform_shap_local_explanation_instance(transformed_data)
 
-shap_nn = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), "MLP NN")       #TODO
-shap_nn.perform_shap_local_explanation_instance(transformed_data)
+#shap_nn = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), "MLP NN")       
+#shap_nn.perform_shap_local_explanation_instance(transformed_data)
 
 
 # Local (prediction level explanations) Anchors
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
 anchor_rf = Anchor_posthoc.AnchorAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_rf.perform_anchor_analysis_instance(transformed_data)
+print(anchor_rf.perform_anchor_analysis_instance(transformed_data))
 
 anchor_dt = Anchor_posthoc.AnchorAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_dt.perform_anchor_analysis_instance(transformed_data)
+print(anchor_dt.perform_anchor_analysis_instance(transformed_data))
 
 anchor_ebm = Anchor_posthoc.AnchorAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_ebm.perform_anchor_analysis_instance(transformed_data)
+print(anchor_ebm.perform_anchor_analysis_instance(transformed_data))
 
 anchor_nn = Anchor_posthoc.AnchorAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
-anchor_nn.perform_anchor_analysis_instance(transformed_data)
+print(anchor_nn.perform_anchor_analysis_instance(transformed_data))
 
 
 # Global (model level explanations) Feature Importance
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-feature_importance_rf = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names())
-feature_importance_rf.explain_instance(transformed_data)
-
-feature_importance_dt = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names())
-feature_importance_dt.explain_instance(transformed_data)
-
-feature_importance_ebm = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names())
-feature_importance_ebm.explain_instance(transformed_data)
-
-feature_importance_nn = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names())
-feature_importance_nn.explain_instance(transformed_data)
+#feature_importance_rf = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names())
+#feature_importance_rf.explain_instance(transformed_data)
+#
+#feature_importance_dt = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names())
+#feature_importance_dt.explain_instance(transformed_data)
+#
+#feature_importance_ebm = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names())
+#feature_importance_ebm.explain_instance(transformed_data)
+#
+#feature_importance_nn = Feature_Importance_posthoc.FeatureImportanceAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names())
+#feature_importance_nn.explain_instance(transformed_data)
 
 # Global (model level explanations) Partial Dependence Plots
 #****************************************************************************************************************************************
@@ -212,15 +212,15 @@ feature_importance_nn.explain_instance(transformed_data)
 # Global (model level explanations) Permutation Importance
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-permutation_importance_rf = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names())
-permutation_importance_rf.explain_instance(transformed_data)
-
-permutation_importance_dt = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names())
-permutation_importance_dt.explain_instance(transformed_data)
-
-permutation_importance_ebm = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names())
-permutation_importance_ebm.explain_instance(transformed_data)
-
-permutation_importance_nn = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names())
-permutation_importance_nn.explain_instance(transformed_data)
+#permutation_importance_rf = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names())
+#permutation_importance_rf.explain_instance(transformed_data)
+#
+#permutation_importance_dt = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names())
+#permutation_importance_dt.explain_instance(transformed_data)
+#
+#permutation_importance_ebm = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names())
+#permutation_importance_ebm.explain_instance(transformed_data)
+#
+#permutation_importance_nn = Permutation_Importance_posthoc.PermutationImportanceAnalysis(trained_nn, X_train, X_test, y_test, processor.get_feature_names())
+#permutation_importance_nn.explain_instance(transformed_data)
 

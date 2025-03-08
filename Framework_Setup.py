@@ -33,7 +33,7 @@ import MLPClassifier
 # Data Loading
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-df = pd.read_csv('AI_Decoded/Dataset/cox-violent-parsed_filt.csv')
+df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
 df = df.dropna(subset=["score_text"])
 
 # Preprocessing: Replace 'African-American' with 'African American' in the 'race' column
@@ -61,7 +61,7 @@ processor = DataTransformer.DataTransformer(
 )
 
 processor.fit_pipeline()
-processor.save_pipeline("AI_Decoded/Data Processing/DataTransformer.pkl")
+processor.save_pipeline("Data Processing/DataTransformer.pkl")
 X_train, X_test, y_train, y_test = processor.split_data()
 
 
@@ -69,37 +69,37 @@ X_train, X_test, y_train, y_test = processor.split_data()
 # Model saving
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-#rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_RandomForest")
-#
-#rf.train_random_forest()
-#rf.evaluate_random_forest()
-#trained_rf = rf.get_model()
-#rf.save_random_forest()
+rf = Randomforest.RandomForestTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_RandomForest")
+
+rf.train_random_forest()
+rf.evaluate_random_forest()
+trained_rf = rf.get_model()
+rf.save_random_forest()
 
 
 ###----------------------------------------------------------------------------------------------------------------------------------------
-#dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_DecisionTree")
-#
-#dt.train_decision_tree()
-#dt.evaluate_decision_tree()
-#trained_dt = dt.get_model()
-#dt.save_decision_tree()
+dt = DecisionTree.DecisionTreeTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_DecisionTree")
+
+dt.train_decision_tree()
+dt.evaluate_decision_tree()
+trained_dt = dt.get_model()
+dt.save_decision_tree()
 
 ###-----------------------------------------------------------------------------------------------------------------------------------------
-ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, processor.get_feature_names(), model_path="AI_Decoded/Classification Models/Saved Models/Test_ExplainableBoosting")
+ebm = Explainable_Boosting_Machines.ExplainableBoostingTrainer(X_train, y_train, X_test, y_test, processor.get_feature_names(), model_path="Classification Models/Saved Models/Test_ExplainableBoosting")
 
 ebm.train_ebm()
-#ebm.evaluate_ebm()
+ebm.evaluate_ebm()
 trained_ebm = ebm.get_model()
 ebm.save_ebm()
 
 ##----------------------------------------------------------------------------------------------------------------------------------------
-#nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="AI_Decoded/Classification Models/Saved Models/Test_NeuralNet")
-#
-#nn.train_neural_network()
-#nn.evaluate_neural_network()
-#trained_nn = nn.get_model()
-#nn.save_neural_network()
+nn = MLPClassifier.NeuralNetworkTrainer(X_train, y_train, X_test, y_test, model_path="Classification Models/Saved Models/Test_NeuralNet")
+
+nn.train_neural_network()
+nn.evaluate_neural_network()
+trained_nn = nn.get_model()
+nn.save_neural_network()
 
 
 
@@ -113,14 +113,14 @@ ebm.global_explanation()
 # General Model explanations (SHAP)
 #****************************************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------------------------------
-#shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "RandomForest")
-#shap_rf.perform_shap_general_explanation() 
-#
-#shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Decision Tree")
-#shap_dt.perform_shap_general_explanation()
+shap_rf = SHAP_posthoc.SHAPAnalysis(trained_rf, X_train, X_test, y_test, processor.get_feature_names(), "RandomForest")
+shap_rf.perform_shap_general_explanation() 
+
+shap_dt = SHAP_posthoc.SHAPAnalysis(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), "Decision Tree")
+shap_dt.perform_shap_general_explanation()
 
 #shap_ebm = SHAP_posthoc.SHAPAnalysis(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), "Explainable Boosted Machine")
 #shap_ebm.perform_shap_general_explanation()
 
-#hap_mlp = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test,y_test, processor.get_feature_names(), "MLP NN")
-#hap_mlp.perform_shap_general_explanation()
+#shap_mlp = SHAP_posthoc.SHAPAnalysis(trained_nn, X_train, X_test,y_test, processor.get_feature_names(), "MLP NN")
+#shap_mlp.perform_shap_general_explanation()

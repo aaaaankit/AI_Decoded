@@ -74,7 +74,7 @@ class Predictor:
         self.local_explainer = local_explainer      
         self.inherent_models = ["Decision Tree", "Explainable Boosting Machine"]
 
-        df = pd.read_csv('AI_Decoded/Dataset/cox-violent-parsed_filt.csv')
+        df = pd.read_csv('Dataset/cox-violent-parsed_filt.csv')
         df = df.dropna(subset=["score_text"])
         df['race'] = df['race'].str.replace('African-American', 'African American')     
 
@@ -97,7 +97,7 @@ class Predictor:
             onehot_cols=one_hot_columns,
         )
 
-        self.processor.load_pipeline("AI_Decoded/Data Processing/DataTransformer.pkl")
+        self.processor.load_pipeline("Data Processing/DataTransformer.pkl")
 
         self.X_train, self.X_test, self.y_train, self.y_test = self.processor.split_data()
         new_data_df = pd.DataFrame([data_point])
@@ -112,10 +112,10 @@ class Predictor:
         }
 
         model_paths = {
-            "Multi-layered Perceptron": "AI_Decoded/Classification Models/Saved Models/Test_NeuralNet",
-            "RandomForest": "AI_Decoded/Classification Models/Saved Models/Test_RandomForest",
-            "Explainable Boosting Machine": "AI_Decoded/Classification Models/Saved Models/Test_ExplainableBoosting",
-            "Decision Tree": "AI_Decoded/Classification Models/Saved Models/Test_DecisionTree",
+            "Multi-layered Perceptron": "Classification Models/Saved Models/Test_NeuralNet",
+            "RandomForest": "Classification Models/Saved Models/Test_RandomForest",
+            "Explainable Boosting Machine": "Classification Models/Saved Models/Test_ExplainableBoosting",
+            "Decision Tree": "Classification Models/Saved Models/Test_DecisionTree",
         }
 
         if self.classification_model in model_classes:

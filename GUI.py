@@ -17,7 +17,7 @@ class ModelExplainerGUI:
         
         # Center the window
         window_width = 600
-        window_height = 750
+        window_height = 900
         
         # Get screen width and height
         screen_width = self.root.winfo_screenwidth()
@@ -153,9 +153,24 @@ class ModelExplainerGUI:
         if not explainer_type or model_name is None:
             messagebox.showerror("Error", "Select a global explainer and a classification model.")
             return
+    
+        general_explainer = General_System.General(classification_model=model_name, global_explainer=explainer_type)
+        metrics = general_explainer.performance_evaluation()
+    
+        # Creating or updating a Text widget to display the performance metrics
+        if hasattr(self, 'metrics_text'):
+            self.metrics_text.delete(1.0, tk.END)  # Clear previous metrics
+        else:
+            # If the metrics text widget does not exist, create it
+            self.metrics_text = tk.Text(self.root, height=10, width=70)
+            self.metrics_text.grid(row=len(self.relevant_features) + 8, column=0, columnspan=2, pady=10)
+    
+        # Format the performance metrics into a readable string
+        performance_str = "\n".join([f"{metric}: {value}" for metric, value in metrics.items()])
+    
+        # Insert the performance metrics into the Text widget
+        self.metrics_text.insert(tk.END, performance_str)
 
-        general_explainer = General_System.General(classification_model=model_name,global_explainer=explainer_type)
-        general_explainer.performance_evaluation()
 
     def save_user_input(self):
         user_data = {}
@@ -172,7 +187,7 @@ class ModelExplainerGUI:
                 return
 
         # Save to a .txt file
-        file_path = "AI_Decoded/dataPoint.txt"
+        file_path = "dataPoint.txt"
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(user_data, file, indent=4)
@@ -181,7 +196,7 @@ class ModelExplainerGUI:
             messagebox.showerror("Error", f"Could not save file: {e}")
 
     def read_user_input(self):
-        file_path = "AI_Decoded/dataPoint.txt"
+        file_path = "dataPoint.txt"
 
         if not os.path.exists(file_path):
             messagebox.showerror("Error", "No saved data found.")

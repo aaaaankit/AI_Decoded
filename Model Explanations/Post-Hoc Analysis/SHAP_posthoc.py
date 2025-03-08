@@ -20,7 +20,7 @@ class SHAPAnalysis:
         perform_shap_analysis(): 
             Perform SHAP analysis and generate SHAP plots (summary, feature importance, dependence, force).
     """
-    def __init__(self, model, X_train, X_test, y_test, feature_names,model_name, shap_results_path="AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results"):
+    def __init__(self, model, X_train, X_test, y_test, feature_names,model_name, shap_results_path="Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results"):
         """
         Initializes the SHAPAnalysis class with the given model, training and test datasets, and results path.
         
@@ -76,6 +76,7 @@ class SHAPAnalysis:
                         return self.model.predict_proba(X)
 
                     background = X_subset  # Use a small subset for efficiency
+                    print(background.shape)
                     explainer = shap.KernelExplainer(model_predict, background)
                     shap_values = explainer.shap_values(X_subset)  # Use a subset to speed up computation
                 except Exception as ke:
@@ -150,27 +151,36 @@ class SHAPAnalysis:
         Returns:
             None: Saves the plots to the given directory.
         """
+        X_subset, _, y_subset, _ = train_test_split(self.X_test, self.y_test, 
+                                                    test_size=(1 - 0.1), 
+                                                    stratify=self.y_test, 
+                                                    random_state=42)
+
         # Initialize SHAP explainer
         try:
             # Try using TreeExplainer (for tree-based models)
-            explainer = shap.TreeExplainer(self.model)
+            explainer = shap.TreeExplainer(self.model,data=X_subset)
             shap_values = explainer.shap_values(instance)
         except Exception as e:
             print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
             try:
                 # Use DeepExplainer (for neural networks)
-                explainer = shap.DeepExplainer(self.model, np.array([instance]))  
-                shap_values = explainer.shap_values(np.array([instance]))[0]  
+                explainer = shap.DeepExplainer(self.model, instance)  
+                shap_values = explainer.explain_row(instance) 
             except Exception as de:
                 print(f"DeepExplainer also failed, switching to KernelExplainer: {de}")
                 try:
                     # Use KernelExplainer as a last resort (for any model)
                     def model_predict(X):
                         return self.model.predict_proba(X)
-
-                    background = instance  # Use the given instance as background
-                    explainer = shap.KernelExplainer(model_predict, background)
-                    shap_values = explainer.shap_values(instance)[0]  # Extract first instance's SHAP values
+                    instance = instance.reshape(1, -1)
+                    print(instance.shape)
+                    print(self.model.predict(instance))
+                    print(instance)
+                    instance.fillna(0)
+                    explainer = shap.KernelExplainer(model_predict,data=X_subset)
+                    print('here')
+                    shap_values = explainer.explain_row(instance)  # Extract first instance's SHAP values
                 except Exception as ke:
                     print(f"KernelExplainer also failed: {ke}")
                     return  # Stop execution if all explainer methods fail

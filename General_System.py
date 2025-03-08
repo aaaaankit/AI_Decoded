@@ -65,7 +65,7 @@ class General:
         Returns:
         - list: A list containing paths to evaluation result files.
         """
-        base_path = "AI_Decoded/Classification Models/Evaluation Results"
+        base_path = "Classification Models/Evaluation Results"
         model_suffixes = {
             "Multi-layered Perceptron": "MLPClassifier",
             "RandomForest": "RandomForestClassifier",
@@ -83,7 +83,7 @@ class General:
             
             # Plot the ROC curve
             self.plot_images([roc_curve_path,confusion_matrix_path])
-            self.plot_metrics(self.parse_performance_metrics(evaluation_file_path))
+            return self.parse_performance_metrics(evaluation_file_path)
 
 
     def global_explanation(self):
@@ -96,30 +96,30 @@ class General:
         explanation_paths = {
             "SHAP": {
                 "Multi-layered Perceptron": [
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_MLP NN.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_MLP NN.png"
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_MLP NN.png",
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_MLP NN.png"
                 ],
                 "RandomForest": [
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_RandomForest.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_RandomForest.png"
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_RandomForest.png",
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_RandomForest.png"
                 ],
                 "Explainable Boosting Machine": [
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/hap_summary_plot_Explainable Boosting Machine.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Explainable Boosting Machinee.png"
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/hap_summary_plot_Explainable Boosting Machine.png",
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Explainable Boosting Machinee.png"
                 ],
                 "Decision Tree": [
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_Decision Tree.png",
-                    "AI_Decoded/Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Decision Tree.png"
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_Decision Tree.png",
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Decision Tree.png"
                 ],
             },
             "Inherent": {
                 "Explainable Boosting Machine": [
-                    "AI_Decoded/Model Explanations/Inherently Interpretable Analysis/EBM_feature_importance.png",
-                    "AI_Decoded/Model Explanations/Inherently Interpretable Analysis/EBM_partial_dependence.png"
+                    "Model Explanations/Inherently Interpretable Analysis/EBM_feature_importance.png",
+                    "Model Explanations/Inherently Interpretable Analysis/EBM_partial_dependence.png"
                 ],
                 "Decision Tree": [
-                    "AI_Decoded/Model Explanations/Inherently Interpretable Analysis/DT_feature_importance.png",
-                    "AI_Decoded/Model Explanations/Inherently Interpretable Analysis/DT_tree_structure.png"
+                    "Model Explanations/Inherently Interpretable Analysis/DT_feature_importance.png",
+                    "Model Explanations/Inherently Interpretable Analysis/DT_tree_structure.png"
                 ],
             }
         }
@@ -168,7 +168,7 @@ class General:
             axes.flatten()[j].axis('off')
 
         plt.tight_layout()
-        #plt.show()
+        plt.show()
 
     def plot_metrics(self, metrics):
         """
