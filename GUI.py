@@ -6,6 +6,8 @@ import os
 import Prediction_System as Prediction_System
 import General_System as General_System
 
+inherent_models = ["Decision Tree", "Explainable Boosting Machine"]
+inherent_explanation = ["Textual", "Visualize", "Feature Importance"]
 class ModelExplainerGUI:
     def __init__(self, root, models):
         self.root = root
@@ -29,6 +31,8 @@ class ModelExplainerGUI:
         
         # Set the position of the window
         self.root.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
+
+        
         
         # Apply a modern style to the widget
         style = ttk.Style()
@@ -110,7 +114,11 @@ class ModelExplainerGUI:
         if not explainer_type or self.last_model is None:
             messagebox.showerror("Error", "Make a prediction first and select a local explainer.")
             return
-    
+
+        if self.last_model not in inherent_models and explainer_type in inherent_explanation:
+            messagebox.showerror("Error", "Selected model does not support this explanation type.")
+            return
+
         # Get the explainer based on user selection
         predictor = Prediction_System.Predictor(classification_model=self.last_model, local_explainer=explainer_type, data_point=self.last_input)
         
@@ -142,6 +150,10 @@ class ModelExplainerGUI:
         model_name = self.model_choice.get()
         if not explainer_type or model_name is None:
             messagebox.showerror("Error", "Select a global explainer and a classification model.")
+            return
+
+        if model_name not in inherent_models and explainer_type in inherent_explanation:
+            messagebox.showerror("Error", "Selected model does not support this explanation type.")
             return
 
         general_explainer = General_System.General(classification_model=model_name,global_explainer=explainer_type)

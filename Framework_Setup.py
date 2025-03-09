@@ -113,6 +113,8 @@ dt.save_decision_tree()
 # ebm_global = Vizualize_ebm.VizEBM(trained_ebm, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 # ebm_global.explain_global()
 
+print(y.unique().tolist())
+
 tree_global = Vizualize_tree.VizTree(trained_dt, X_train, X_test, y_test, processor.get_feature_names(), y.unique().tolist())
 tree_global.explain_global()
 
