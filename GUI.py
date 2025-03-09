@@ -56,12 +56,12 @@ class ModelExplainerGUI:
         
         # Local Explanation Method Selection
         ttk.Label(root, text="Select Local Explanation Method:").grid(row=len(self.relevant_features) + 2, column=0, sticky="w", padx=10, pady=10)
-        self.local_explainer_choice = ttk.Combobox(root, values=["SHAP", "LIME", "Anchors"], width=20)
+        self.local_explainer_choice = ttk.Combobox(root, values=["SHAP", "LIME", "Anchors", "Textual", "Visualize", "Feature Importance"], width=20)
         self.local_explainer_choice.grid(row=len(self.relevant_features) + 2, column=1, padx=10, pady=5)
 
         # Global Explanation Method Selection
         ttk.Label(root, text="Select Global Explanation Method:").grid(row=len(self.relevant_features) + 3, column=0, sticky="w", padx=10, pady=10)
-        self.global_explainer_choice = ttk.Combobox(root, values=["SHAP"], width=20)  # Assuming only SHAP is available for global
+        self.global_explainer_choice = ttk.Combobox(root, values=["SHAP", "Textual", "Visualize", "Feature Importance"], width=20)  # Assuming only SHAP is available for global
         self.global_explainer_choice.grid(row=len(self.relevant_features) + 3, column=1, padx=10, pady=5)
 
         # Predict Button

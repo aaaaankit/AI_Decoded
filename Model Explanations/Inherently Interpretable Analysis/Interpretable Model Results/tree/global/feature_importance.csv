@@ -1,0 +1,17 @@
+Feature,Importance
+race_African American,0.4222213438386835
+r_charge_degree,0.24301348636526537
+age,0.19277889090262157
+juv_fel_count,0.14198627889342952
+juv_misd_count,0.0
+juv_other_count,0.0
+r_days_from_arrest,0.0
+race_Asian,0.0
+race_Caucasian,0.0
+race_Hispanic,0.0
+race_Native American,0.0
+race_Other,0.0
+sex_Female,0.0
+sex_Male,0.0
+c_charge_degree,0.0
+vr_charge_degree,0.0

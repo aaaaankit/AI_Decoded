@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
 import math
-
 import numpy as np
 import re
 
@@ -112,16 +111,33 @@ class General:
                     "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Decision Tree.png"
                 ],
             },
-            "Inherent": {
+            "Textual": {
                 "Explainable Boosting Machine": [
-                    "Model Explanations/Inherently Interpretable Analysis/EBM_feature_importance.png",
-                    "Model Explanations/Inherently Interpretable Analysis/EBM_partial_dependence.png"
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/global/global_feature_importance.png",
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/global/combined_feature_effects.png"
                 ],
                 "Decision Tree": [
-                    "Model Explanations/Inherently Interpretable Analysis/DT_feature_importance.png",
-                    "Model Explanations/Inherently Interpretable Analysis/DT_tree_structure.png"
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/feature_importance_plot.png",
                 ],
-            }
+            },
+            "Visualize": {
+                "Explainable Boosting Machine": [
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/global/global_explanation_visualization.png",
+                ],
+                "Decision Tree": [
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/tree_visualization.png",
+                ],
+            },
+            "Feature Importance": {
+                "Explainable Boosting Machine": [
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/global/global_feature_importance.png",
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/global/combined_feature_effects.png"
+                ],
+                "Decision Tree": [
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/feature_importance_plot.png",
+                ],
+            },
+            
         }
 
         self.plot_images(explanation_paths.get(self.global_explainer, {}).get(self.classification_model, Exception))
@@ -147,18 +163,21 @@ class General:
 
         fig, axes = plt.subplots(rows, cols, figsize=(cols * img_size, rows * img_size))
 
-        # Flatten axes for easy iteration (handles cases with a single row)
-        axes = axes if isinstance(axes, np.ndarray) else [axes]
+        # Ensure axes is always a 2D array
+        if rows == 1 and cols == 1:
+            axes = np.array([[axes]])
+        elif rows == 1 or cols == 1:
+            axes = np.expand_dims(axes, axis=0 if rows == 1 else 1)
 
         for i, image_path in enumerate(image_paths):
             try:
                 img = mpimg.imread(image_path)
                 axes.flatten()[i].imshow(img)
                 axes.flatten()[i].axis('off')
-                if (i == 1):
-                    axes.flatten()[i].set_title(f"Feature Importance")
+                if i == 1:
+                    axes.flatten()[i].set_title("Feature Importance")
                 else:
-                    axes.flatten()[i].set_title(f"Summary Plot")
+                    axes.flatten()[i].set_title("Summary Plot")
             except FileNotFoundError:
                 axes.flatten()[i].set_title("Image Not Found")
                 axes.flatten()[i].axis('off')

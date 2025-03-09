@@ -1,33 +1,19 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, accuracy_score
-import shap
-# from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
-#import graphviz
 from pathlib import Path
 import sys
 
 cwd = Path(__file__).parent
-# parent_cwd = Path(__file__).parents[1]
-
 sys.path
-# sys.path.append(str(parent_cwd))
 
 import Classification_models
 
-# make class with Classification_models as parent class
 class DecisionTreeTrainer(Classification_models.ClassificationModels):
-    def __init__(self, X_train, y_train, X_test, y_test, model_path, evaluation_results="Classification Models/Evaluation Results"):
+    def __init__(self, X_train, y_train, X_test, y_test, model_path, max_depth=3, evaluation_results="Classification Models/Evaluation Results"):
         modelName = 'DecisionTreeClassifier'
         super().__init__(X_train, y_train, X_test, y_test, modelName, model_path, evaluation_results)
 
-        self.model = DecisionTreeClassifier(max_depth=10, random_state=42)
+        self.model = DecisionTreeClassifier(max_depth=max_depth, random_state=42)
     
     def train_decision_tree(self):
         """
@@ -54,6 +40,5 @@ class DecisionTreeTrainer(Classification_models.ClassificationModels):
         self.model = self.load_model(self.model)
     
     def get_model(self):
-        """Return the trained Random Forest model."""
+        """Return the trained Decision Tree model."""
         return self.model
-

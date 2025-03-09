@@ -1,0 +1,5 @@
+Decision path for the instance:
+Node 0: (feature 'race_African American' <= 0.5000)
+Node 1: (feature 'age' <= 0.1859)
+Node 2: (feature 'r_charge_degree' <= 8.5000)
+Leaf node 3 reached.
