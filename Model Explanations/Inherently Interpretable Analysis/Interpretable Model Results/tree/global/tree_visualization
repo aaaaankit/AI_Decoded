@@ -1,0 +1,33 @@
+digraph Tree {
+node [shape=box, style="filled", color="black", fontname="helvetica"] ;
+edge [fontname="helvetica"] ;
+0 [label="race_African American <= 0.5\ngini = 0.639\nsamples = 14634\nvalue = [3680.0, 6863.0, 4091.0]\nclass = Medium", fillcolor="#cbf8de"] ;
+1 [label="age <= 0.186\ngini = 0.544\nsamples = 6838\nvalue = [973.0, 4188.0, 1677.0]\nclass = Medium", fillcolor="#9ff2c2"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="r_charge_degree <= 8.5\ngini = 0.634\nsamples = 3303\nvalue = [715, 1549, 1039]\nclass = Medium", fillcolor="#d2f9e3"] ;
+1 -> 2 ;
+3 [label="gini = 0.665\nsamples = 1524\nvalue = [454, 545, 525]\nclass = Medium", fillcolor="#fbfefc"] ;
+2 -> 3 ;
+4 [label="gini = 0.576\nsamples = 1779\nvalue = [261, 1004, 514]\nclass = Medium", fillcolor="#b2f5ce"] ;
+2 -> 4 ;
+5 [label="r_charge_degree <= 8.5\ngini = 0.405\nsamples = 3535\nvalue = [258, 2639, 638]\nclass = Medium", fillcolor="#76eda8"] ;
+1 -> 5 ;
+6 [label="gini = 0.552\nsamples = 1164\nvalue = [149, 695, 320]\nclass = Medium", fillcolor="#a7f3c7"] ;
+5 -> 6 ;
+7 [label="gini = 0.308\nsamples = 2371\nvalue = [109, 1944, 318]\nclass = Medium", fillcolor="#62ea9b"] ;
+5 -> 7 ;
+8 [label="juv_fel_count <= 0.025\ngini = 0.666\nsamples = 7796\nvalue = [2707, 2675, 2414]\nclass = Low", fillcolor="#fffefe"] ;
+0 -> 8 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+9 [label="r_charge_degree <= 8.5\ngini = 0.665\nsamples = 7261\nvalue = [2307, 2641, 2313]\nclass = Medium", fillcolor="#f2fdf7"] ;
+8 -> 9 ;
+10 [label="gini = 0.657\nsamples = 3665\nvalue = [1454, 958, 1253]\nclass = Low", fillcolor="#fdf4ee"] ;
+9 -> 10 ;
+11 [label="gini = 0.638\nsamples = 3596\nvalue = [853, 1683, 1060]\nclass = Medium", fillcolor="#cef9e0"] ;
+9 -> 11 ;
+12 [label="r_charge_degree <= 6.5\ngini = 0.401\nsamples = 535\nvalue = [400, 34, 101]\nclass = Low", fillcolor="#eda877"] ;
+8 -> 12 ;
+13 [label="gini = 0.305\nsamples = 270\nvalue = [222, 14, 34]\nclass = Low", fillcolor="#ea9b61"] ;
+12 -> 13 ;
+14 [label="gini = 0.479\nsamples = 265\nvalue = [178, 20, 67]\nclass = Low", fillcolor="#f0b890"] ;
+12 -> 14 ;
+}

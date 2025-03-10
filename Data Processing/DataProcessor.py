@@ -1,0 +1,179 @@
+from sklearn.calibration import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import KNNImputer
+import pandas as pd
+
+class DataProcessor:
+    """
+    A class to preprocess the dataset and prepare it for machine learning modeling.
+    
+    This class provides functionality to filter relevant columns, handle missing values,
+    normalize numerical columns, encode categorical features, and split the data into training
+    and testing sets. It allows for flexibility through enabling/disabling each step.
+
+    Attributes:
+        df (pandas.DataFrame): The input dataset containing features.
+        y (pandas.Series): The target variable.
+        relevant_columns (list): List of columns to include in the processing.
+        normalizer_enabled (bool): Flag to enable/disable normalization of numerical features.
+        encoder_enabled (bool): Flag to enable/disable encoding of categorical features.
+        imputer_enabled (bool): Flag to enable/disable missing value imputation.
+
+    Methods:
+        preprocess_data(): 
+            Filters the dataset to include only the relevant columns specified in `relevant_columns`.
+        fill_missing_values(): 
+            Handles missing values by imputing numerical values with KNN and filling categorical missing values with 'Unknown'.
+        normalize_numerical_columns(): 
+            Normalizes numerical columns using Min-Max scaling to the range [0, 1].
+        encode_categorical_features(): 
+            Encodes categorical features using One-Hot Encoding for nominal features and Label Encoding for binary/ordinal features.
+        split_data(): 
+            Splits the dataset into training and testing sets.
+        process_data(): 
+            Runs the full preprocessing pipeline: filters columns, handles missing values, normalizes and encodes features, and splits the data.
+    """
+    
+    def __init__(self, df, y, relevant_columns, normalizer_enabled=True, encoder_enabled=True, imputer_enabled=True, safe_processed_data_enabled=False, one_hot_columns=None, label_mappings=None):
+        """
+        Initializes the DataProcessor with the given dataset and settings.
+
+        :param df: The input dataset as a pandas DataFrame.
+        :param y: The target variable as a pandas Series or column from the DataFrame.
+        :param relevant_columns: A list of relevant columns to be processed.
+        :param normalizer_enabled: Boolean flag to enable/disable normalization of numerical columns (default is True).
+        :param encoder_enabled: Boolean flag to enable/disable encoding of categorical columns (default is True).
+        :param imputer_enabled: Boolean flag to enable/disable missing value imputation (default is True).
+        """
+        self.df = df
+        self.y = y
+        self.normalizer_enabled = normalizer_enabled
+        self.encoder_enabled = encoder_enabled
+        self.imputer_enabled = imputer_enabled
+        self.relevant_columns = relevant_columns
+        self.safe_processed_data_enabled = safe_processed_data_enabled
+        self.one_hot_columns = one_hot_columns
+        self.label_mappings = label_mappings
+
+    def preprocess_data(self):
+        """
+        Filters the dataset to include only the relevant columns specified in `relevant_columns`.
+
+        This method updates the dataframe to contain only the columns that are specified as relevant
+        for the analysis, as indicated by the `relevant_columns` attribute.
+        """
+        self.df = self.df[self.relevant_columns]
+
+    def fill_missing_values(self):
+        """
+        Handles missing values in the dataset.
+
+        For numerical columns, missing values are imputed using KNN imputation.
+        For categorical columns, missing values are filled with the string 'Unknown'.
+        """
+        knn_imputer = KNNImputer(n_neighbors=5)
+        print(len(self.df.columns))
+        for col in self.df.columns:
+            if self.df[col].dtype == 'object':  
+                self.df[col].fillna('Unknown', inplace=True)  
+            elif self.df[col].dtype in ['int64', 'float64']:
+                if self.df[col].isna().sum() > 0:  # Only apply imputation if NaN values exist
+                    print("Use knn imputer")
+                    print(col)
+                    self.df[[col]] = knn_imputer.fit_transform(self.df[[col]])
+
+        # Ensure no remaining NaN values
+        #self.df.fillna(method='ffill', inplace=False)  # Forward fill as a backup
+        #self.df.fillna(method='bfill', inplace=False)  # Backward fill if forward fill isn't possible
+
+    def normalize_numerical_columns(self):
+        """
+        Normalizes numerical columns using Min-Max scaling.
+        
+        This method scales numerical columns to the range [0, 1] using the `MinMaxScaler` from scikit-learn.
+        """
+        scaler = MinMaxScaler() 
+
+        # Iterate through the columns and normalize numerical columns
+        for col in self.df.columns:
+            if self.df[col].dtype in ['int64', 'float64']: 
+                self.df[col] = scaler.fit_transform(self.df[[col]]) 
+
+    def encode_categorical_features(self, one_hot_columns=None, label_mappings=None):
+        """
+        Encodes categorical features in the dataset.
+        
+        This method applies:
+        - One-Hot Encoding for specified columns (nominal features).
+        - Custom Label Encoding for other categorical features (binary or ordinal features).
+        
+        :param one_hot_columns: List of column names to apply One-Hot Encoding.
+                                If None, all columns with more than 2 unique values will be one-hot encoded.
+        :param label_mappings: Dictionary of column names with custom Label Encoding mappings.
+                               If None, default Label Encoding will be applied.
+        """
+        le = LabelEncoder()
+
+        # Default to One-Hot Encoding columns with more than 2 unique values, if no specific columns are provided
+        if one_hot_columns is None:
+            one_hot_columns = [col for col in self.df.columns if self.df[col].dtype == 'object' and len(self.df[col].unique()) > 2]
+
+        # Loop through all categorical columns to apply encoding
+        for col in self.df.columns:
+            if self.df[col].dtype == 'object':
+                if col in one_hot_columns:  # Apply One-Hot Encoding
+                    self.df = pd.get_dummies(self.df, columns=[col], drop_first=True)
+                else:  # Apply Label Encoding
+                    if label_mappings and col in label_mappings:
+                        # Apply custom mapping for Label Encoding
+                        self.df[col] = self.df[col].map(label_mappings[col])
+                    else:
+                        # Apply default Label Encoding if no mapping is provided
+                        self.df[col] = le.fit_transform(self.df[col])
+
+        return self.df
+                    
+    def safe_processed_data(self):
+        self.df.to_csv("cox-violent-parsed_filt_processed.csv", index=False)
+
+    def split_data(self, test_size=0.2, random_state=42):
+        """
+        Splits the dataset into training and testing sets.
+
+        :param test_size: Proportion of the data to use for the test set (default is 20%).
+        :param random_state: Random seed for reproducibility (default is 42).
+        :return: The training and testing data (X_train, X_test, y_train, y_test).
+        """
+        if self.df is None:
+            print("No data loaded.")
+            return None, None, None, None
+
+        # Split the dataset into training and testing sets using train_test_split
+        return train_test_split(self.df, self.y, test_size=test_size, random_state=random_state)
+
+    def process_data(self):
+        """
+        Runs the entire data processing pipeline in sequence:
+        1. Filters the relevant columns.
+        2. Handles missing values (if enabled).
+        3. Normalizes numerical columns (if enabled).
+        4. Encodes categorical features (if enabled).
+        5. Splits the processed data into training and testing sets.
+
+        :return: X_train, X_test, y_train, y_test - The processed and split datasets.
+        """
+        self.preprocess_data()
+        print("here")
+        if self.imputer_enabled:
+            self.fill_missing_values()
+            print("here2")
+        if self.normalizer_enabled:
+            self.normalize_numerical_columns()
+            print("here3")
+        if self.encoder_enabled:
+            self.encode_categorical_features(self.one_hot_columns, self.label_mappings)
+            print("here4")
+        if self.safe_processed_data_enabled:
+            self.safe_processed_data()
+        return self.split_data()

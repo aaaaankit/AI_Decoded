@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./Data Processing",
+        "./Classification Models/Uninterpretable Models"
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "sex": "Male",
+    "age": 27,
+    "race": "Caucasian",
+    "juv_fel_count": 1,
+    "juv_misd_count": 2,
+    "juv_other_count": 0,
+    "c_charge_degree": "(F1)",
+    "r_charge_degree": "(F2)",
+    "r_days_from_arrest": 15,
+    "vr_charge_degree": "(M1)"
+}

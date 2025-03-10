@@ -1,0 +1,17 @@
+Feature contributions for the instance:
+age: 0.0222
+juv_fel_count: 0.0071
+juv_misd_count: 0.0000
+juv_other_count: 0.0000
+r_days_from_arrest: 0.0000
+race_African American: 0.0000
+race_Asian: 0.0000
+race_Caucasian: 0.0000
+race_Hispanic: 0.0000
+race_Native American: 0.0000
+race_Other: 0.0000
+sex_Female: 0.0000
+sex_Male: 0.0000
+c_charge_degree: 0.0000
+r_charge_degree: 0.2430
+vr_charge_degree: 0.0000
