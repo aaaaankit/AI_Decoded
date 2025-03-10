@@ -1,0 +1,1 @@
+{'age': 27.0, 'juv_fel_count': 1.0, 'juv_misd_count': 2.0, 'juv_other_count': 0.0, 'r_days_from_arrest': 15.0, 'race_African American': 0.0, 'race_Asian': 0.0, 'race_Caucasian': 1.0, 'race_Hispanic': 0.0, 'race_Native American': 0.0, 'race_Other': 0.0, 'sex_Female': 0.0, 'sex_Male': 1.0, 'c_charge_degree': 1.0, 'r_charge_degree': 1.0, 'vr_charge_degree': 5.0}
