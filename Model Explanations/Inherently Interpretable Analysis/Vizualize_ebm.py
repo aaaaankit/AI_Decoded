@@ -175,6 +175,14 @@ class VizEBM:
         with open(os.path.join(save_dir, "feature_contributions.txt"), "w") as file:
             file.write(explanation_text)
 
+        # Create a plot with the explanation text
+        plt.figure(figsize=(10, 20))
+        plt.text(0.01, 0.99, explanation_text, verticalalignment='top', horizontalalignment='left', wrap=True, fontsize=20, family='monospace')
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(os.path.join(save_dir, "local_explanation_text_plot.png"), bbox_inches='tight')
+        plt.show()
+
         # **Plot the feature contributions**
         feature_scores = np.array(feature_scores)  # Convert to NumPy array
         num_classes = feature_scores.shape[1]  # Number of classes
