@@ -1,21 +1,21 @@
 |--- race_African American <= 0.50
-|   |--- age <= 0.19
+|   |--- age <= 32.50
 |   |   |--- r_charge_degree <= 8.50
 |   |   |   |--- class: Low
 |   |   |--- r_charge_degree >  8.50
 |   |   |   |--- class: Low
-|   |--- age >  0.19
+|   |--- age >  32.50
 |   |   |--- r_charge_degree <= 8.50
 |   |   |   |--- class: Low
 |   |   |--- r_charge_degree >  8.50
 |   |   |   |--- class: Low
 |--- race_African American >  0.50
-|   |--- juv_fel_count <= 0.03
+|   |--- juv_fel_count <= 0.50
 |   |   |--- r_charge_degree <= 8.50
 |   |   |   |--- class: High
 |   |   |--- r_charge_degree >  8.50
 |   |   |   |--- class: Low
-|   |--- juv_fel_count >  0.03
+|   |--- juv_fel_count >  0.50
 |   |   |--- r_charge_degree <= 6.50
 |   |   |   |--- class: High
 |   |   |--- r_charge_degree >  6.50

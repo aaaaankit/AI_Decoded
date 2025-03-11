@@ -1,6 +1,6 @@
 digraph {
 	0 [label="race_African American <= 0.5000" fillcolor=lightblue shape=ellipse style=filled]
-	1 [label="age <= 0.1859" fillcolor=lightblue shape=ellipse style=filled]
+	1 [label="age <= 32.5000" fillcolor=lightblue shape=ellipse style=filled]
 	2 [label="r_charge_degree <= 8.5000" fillcolor=lightblue shape=ellipse style=filled]
 	3 [label="Leaf node 3" fillcolor=lightgreen shape=rectangle style=filled]
 	0 -> 1

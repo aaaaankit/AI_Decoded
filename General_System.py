@@ -116,7 +116,7 @@ class General:
                     "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/local_explanation_text.png",
                 ],
                 "Decision Tree": [
-                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/decision_path_tree.png",
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/decision_tree_rules.png",
                 ],
             },
             "Visualize": {
