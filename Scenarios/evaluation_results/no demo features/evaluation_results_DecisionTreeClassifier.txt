@@ -1,0 +1,16 @@
+Precision for each class:
+[0.67619048 0.51285885 1.        ]
+
+Recall for each class:
+[0.22805139 0.98904268 0.        ]
+
+F1-score for each class:
+[0.34107286 0.67546278 0.        ]
+
+Average Precision: 0.6864878801764779
+Average Recall: 0.5269199234763596
+Average F1-score: 0.4071643922489114
+
+AUC: 0.6414364025442308
+Cross-Validation Scores: [0.51588657 0.51793645 0.51759481 0.51349505 0.5140123 ]
+Average Cross-Validation Score: 0.5157850367135965
