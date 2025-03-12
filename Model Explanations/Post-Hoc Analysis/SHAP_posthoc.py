@@ -60,13 +60,13 @@ class SHAPAnalysis:
 
         try:
             # Try using TreeExplainer (for tree-based models)
-            explainer = shap.TreeExplainer(self.model)
+            explainer = shap.TreeExplainer(self.model,feature_names=self.feature_names)
             shap_values = explainer.shap_values(X_subset)
         except Exception as e:
             print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
             try:
                 # Use DeepExplainer (for neural networks)
-                explainer = shap.DeepExplainer(self.model, X_subset)  # Use a small background set
+                explainer = shap.DeepExplainer(self.model, X_subset, feature_names=self.feature_names)  # Use a small background set
                 shap_values = explainer.shap_values(X_subset)
             except Exception as de:
                 print(f"DeepExplainer also failed, switching to KernelExplainer: {de}")
@@ -75,9 +75,7 @@ class SHAPAnalysis:
                     def model_predict(X):
                         return self.model.predict_proba(X)
 
-                    background = X_subset  # Use a small subset for efficiency
-                    print(background.shape)
-                    explainer = shap.KernelExplainer(model_predict, background)
+                    explainer = shap.KernelExplainer(model_predict, X_subset, feature_names=self.feature_names)
                     shap_values = explainer.shap_values(X_subset)  # Use a subset to speed up computation
                 except Exception as ke:
                     print(f"KernelExplainer also failed: {ke}")
@@ -152,7 +150,7 @@ class SHAPAnalysis:
             None: Saves the plots to the given directory.
         """
         X_subset, _, y_subset, _ = train_test_split(self.X_test, self.y_test, 
-                                                    test_size=(1 - 0.1), 
+                                                    test_size=(1 - 0.01), 
                                                     stratify=self.y_test, 
                                                     random_state=42)
 
@@ -165,22 +163,16 @@ class SHAPAnalysis:
             print(f"TreeExplainer not supported, switching to DeepExplainer: {e}")
             try:
                 # Use DeepExplainer (for neural networks)
-                explainer = shap.DeepExplainer(self.model, instance)  
-                shap_values = explainer.explain_row(instance) 
+                explainer = shap.DeepExplainer(self.model, data=X_subset)  
+                shap_values = explainer.shap_values(instance) 
             except Exception as de:
                 print(f"DeepExplainer also failed, switching to KernelExplainer: {de}")
                 try:
                     # Use KernelExplainer as a last resort (for any model)
                     def model_predict(X):
                         return self.model.predict_proba(X)
-                    instance = instance.reshape(1, -1)
-                    print(instance.shape)
-                    print(self.model.predict(instance))
-                    print(instance)
-                    instance.fillna(0)
                     explainer = shap.KernelExplainer(model_predict,data=X_subset)
-                    print('here')
-                    shap_values = explainer.explain_row(instance)  # Extract first instance's SHAP values
+                    shap_values = explainer.shap_values(instance)  # Extract first instance's SHAP values
                 except Exception as ke:
                     print(f"KernelExplainer also failed: {ke}")
                     return  # Stop execution if all explainer methods fail

@@ -103,8 +103,8 @@ class General:
                     "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_RandomForest.png"
                 ],
                 "Explainable Boosting Machine": [
-                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/hap_summary_plot_Explainable Boosting Machine.png",
-                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Explainable Boosting Machinee.png"
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_Explainable Boosted Machine.png",
+                    "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_feature_importance_Explainable Boosted Machine.png"
                 ],
                 "Decision Tree": [
                     "Model Explanations/Post-Hoc Analysis/Post-Hoc Analysis Results/shap_summary_plot_Decision Tree.png",
@@ -116,7 +116,7 @@ class General:
                     "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/ebm/local_explanation_text.png",
                 ],
                 "Decision Tree": [
-                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/decision_path_tree.png",
+                    "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/decision_tree_rules.png",
                 ],
             },
             "Visualize": {

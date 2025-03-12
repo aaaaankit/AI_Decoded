@@ -76,14 +76,26 @@ class VizTree:
 
     def export_rules(self):
         """
-        Export decision tree rules in text format.
+        Export decision tree rules in text format and save as an image.
         """
         rules = export_text(self.model, feature_names=self.feature_names)
         print("Decision Tree Rules:")
         print(rules)
-        # save to Model Explanations\Inherently Interpretable Analysis\Interpretable Model Results
-        with open("Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global/decision_tree_rules.txt", "w") as file:
+        
+        # Save the rules to a text file
+        save_dir = "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree/global"
+        os.makedirs(save_dir, exist_ok=True)
+        with open(f"{save_dir}/decision_tree_rules.txt", "w") as file:
             file.write(rules)
+        
+        # Create a plot with the rules text
+        plt.figure(figsize=(10, 20))
+        plt.text(0.01, 0.99, rules, verticalalignment='top', horizontalalignment='left', wrap=True, fontsize=20, family='monospace')
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(f"{save_dir}/decision_tree_rules.png", bbox_inches='tight')
+        plt.show()
+        
         return rules
 
     def decision_path(self, instance):
@@ -149,9 +161,13 @@ class VizTree:
         save_dir = "Model Explanations/Inherently Interpretable Analysis/Interpretable Model Results/tree"
         os.makedirs(save_dir, exist_ok=True)
 
-        # Save textual explanation
-        with open(f"{save_dir}/decision_path.txt", "w") as file:
-            file.write(explanation_text)
+        # Create a plot with the explanation text
+        plt.figure(figsize=(10, 20))
+        plt.text(0.01, 0.99, explanation_text, verticalalignment='top', horizontalalignment='left', wrap=True, fontsize=20, family='monospace')
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(f"{save_dir}/decision_path_text.png", bbox_inches='tight')
+        plt.show()
 
         # Save and render decision path as a tree diagram
         tree_path_img = f"{save_dir}/decision_path_tree"
@@ -165,7 +181,6 @@ class VizTree:
         plt.imshow(img)
         plt.axis("off")  # Hide axes for better visualization
         plt.show()
-
 
         return explanation_text
 

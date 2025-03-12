@@ -41,8 +41,8 @@ class DataTransformer:
             transformers=[
                 # Imputation and Scaling for Numeric Columns
                 ("num_impute_scale", Pipeline([
-                    ("imputer", KNNImputer(n_neighbors=3)),  
-                    ("scaler", MinMaxScaler())             
+                    ("imputer", KNNImputer(n_neighbors=3))#,  
+                    #("scaler", MinMaxScaler())             
                 ]), self.numeric_cols),
         
                 # Imputation for Categorical Columns (Replace NaN with 'Unknown') + One-Hot Encoding
